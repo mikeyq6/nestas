@@ -1,4 +1,5 @@
 #pragma once
 
-#include "Display.h"
 #include "CPU.h"
+#include "Display.h"
+#include "SharedData.h"

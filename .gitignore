@@ -39,3 +39,8 @@
 
 # debug information files
 *.dwo
+
+*.dSYM/
+nestas
+.vscode/
+roms/
