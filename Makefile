@@ -1,5 +1,5 @@
 CC=g++ -std=c++17
-OBJS=nestas.cpp Emulator.cpp CPU.cpp Stack.cpp Display.cpp DisplayFactory.cpp SDLDisplay.cpp SharedData.cpp
+OBJS=nestas.cpp Emulator.cpp CPU.cpp Display.cpp DisplayFactory.cpp SDLDisplay.cpp SharedData.cpp
 LFLAGS=-lSDL2 -lSDL2_image -lSDL2_ttf
 SUPPRESS=
 EXENAME=nestas
