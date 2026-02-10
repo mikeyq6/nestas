@@ -9,10 +9,10 @@ using std::uint8_t;
 using std::uint16_t;
 
 enum FLAG {
-    C = 0x1,
-    Z = 0x2,
-    I = 0x4,
-    D = 0x8,
+    C = 0x01,
+    Z = 0x02,
+    I = 0x04,
+    D = 0x08,
     B = 0x10,
     V = 0x40,
     N = 0x80
@@ -27,8 +27,8 @@ private:
     ~CPU();
 
     // registers
-    uint8_t a, x, y, p;
-    uint16_t pc, sp;
+    uint8_t a, x, y, p, s;
+    uint16_t pc;
 
     uint8_t memory[MEMORY_SIZE];
 

@@ -5,16 +5,18 @@ CPU::CPU() {
     x = 0;
     y = 0;
     p = 0;
+    s = 0;
     pc = 0;
-    sp = 0;
-
-    std::fill(memory, memory + MEMORY_SIZE, 0);
 }
 CPU::~CPU() {
 }
 
 void CPU::init() {
-    return;
+    s = 0xfd;
+
+    std::fill(memory, memory + MEMORY_SIZE, 0);
+
+    set_flag(I);
 }
 
 void CPU::set_flag(FLAG flag) {
