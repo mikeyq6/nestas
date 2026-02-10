@@ -21,6 +21,7 @@ enum FLAG {
 class CPU {
 public:
     void init();
+    void reset();
 
 private:
     CPU();

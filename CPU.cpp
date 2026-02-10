@@ -18,6 +18,11 @@ void CPU::init() {
 
     set_flag(I);
 }
+void CPU::reset() {
+    s -= 3;
+    pc = (memory[0xfffc] | (memory[0xfffd] << 8));
+    set_flag(I);
+}
 
 void CPU::set_flag(FLAG flag) {
     p |= flag;
