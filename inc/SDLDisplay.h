@@ -9,4 +9,5 @@ public:
     ~SDLDisplay();
 
     void Draw() override;
+    void init() override;
 };

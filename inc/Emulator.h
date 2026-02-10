@@ -14,4 +14,6 @@ public:
 
 private:
     Display* display;
+    CPU* cpu;
+    SharedData *shared_data;
 };

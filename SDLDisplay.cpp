@@ -7,6 +7,10 @@ SDLDisplay::~SDLDisplay() {
 
 }
 
+void SDLDisplay::init() {
+    return;
+}
+
 void SDLDisplay::Draw() {
     return;
 }

@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "Constants.h"
+#include "SharedData.h"
 
 using std::uint8_t;
 using std::uint16_t;
@@ -20,16 +21,21 @@ enum FLAG {
 
 class CPU {
 public:
+    CPU(SharedData *shared_data);
+    ~CPU();
+
     void init();
     void reset();
+    void run();
+    void stop();
 
 private:
-    CPU();
-    ~CPU();
 
     // registers
     uint8_t a, x, y, p, s;
     uint16_t pc;
+
+    SharedData *shared_data;
 
     uint8_t memory[MEMORY_SIZE];
 
