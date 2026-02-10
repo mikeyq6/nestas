@@ -15,3 +15,9 @@ void Emulator::Init() {
     cpu->init();
     display->init();
 }
+
+void Emulator::set_program_bytes(const char *bytes, int size) {
+    for(int i = 0; i < size; i++) {
+        // cpu->memory[i] = bytes[i];
+    }
+}
