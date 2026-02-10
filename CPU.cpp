@@ -12,3 +12,17 @@ CPU::CPU() {
 }
 CPU::~CPU() {
 }
+
+void CPU::init() {
+    return;
+}
+
+void CPU::set_flag(FLAG flag) {
+    p |= flag;
+}
+void CPU::reset_flag(FLAG flag) {
+    p &= ~flag;
+}
+bool CPU::is_set(FLAG flag) {
+    return (p & flag) != 0;
+}

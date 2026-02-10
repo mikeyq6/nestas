@@ -1,0 +1,1 @@
+constexpr auto MEMORY_SIZE = 0xffff;
