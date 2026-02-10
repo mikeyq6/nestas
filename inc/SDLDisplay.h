@@ -1,6 +1,10 @@
 #pragma once
 
+#include <vector>
+
 #include "Display.h"
+
+using std::fill;
 
 class SDLDisplay : public Display
 {

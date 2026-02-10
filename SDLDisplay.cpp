@@ -8,7 +8,7 @@ SDLDisplay::~SDLDisplay() {
 }
 
 void SDLDisplay::init() {
-    return;
+    fill(pixels, pixels + NUM_PIXELS, 0);
 }
 
 void SDLDisplay::draw() {

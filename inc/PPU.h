@@ -2,6 +2,8 @@
 
 #include <cstdint>
 
+#include "Constants.h"
+
 class PPU {
 public:
     PPU();
