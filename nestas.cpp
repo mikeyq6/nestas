@@ -12,7 +12,7 @@ int main(int argc, char** argv) {
     }
 
     emulator = new Emulator();
-    emulator->Init();
+    emulator->init();
 
     string rom_file = argv[argc-1];
     if(!read_file_contents(rom_file)) {

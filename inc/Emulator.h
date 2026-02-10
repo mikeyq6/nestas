@@ -12,7 +12,7 @@ public:
     Emulator();
     ~Emulator();
 
-    void Init();
+    void init();
     void run();
     void set_program_bytes(const char *bytes, int size);
 

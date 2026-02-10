@@ -11,7 +11,7 @@ Emulator::~Emulator() {
     delete cpu;
 }
 
-void Emulator::Init() {
+void Emulator::init() {
     cpu->init();
     display->init();
 }
