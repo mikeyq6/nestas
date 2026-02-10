@@ -2,7 +2,7 @@
 
 Emulator::Emulator() {
     shared_data = new SharedData();
-    display = DisplayFactory::GetDisplay(SDL);
+    display = DisplayFactory::get_display(SDL, shared_data);
     cpu = new CPU(shared_data);
 }
 Emulator::~Emulator() {

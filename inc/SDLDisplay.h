@@ -5,7 +5,7 @@
 class SDLDisplay : public Display
 {
 public:
-    SDLDisplay();
+    SDLDisplay(SharedData *shared_data);
     ~SDLDisplay();
 
     void Draw() override;

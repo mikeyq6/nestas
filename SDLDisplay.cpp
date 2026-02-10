@@ -1,6 +1,6 @@
 #include "inc/SDLDisplay.h"
 
-SDLDisplay::SDLDisplay() {
+SDLDisplay::SDLDisplay(SharedData *shared_data) : Display(shared_data) {
 
 }
 SDLDisplay::~SDLDisplay() {

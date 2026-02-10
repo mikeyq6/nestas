@@ -9,5 +9,5 @@ typedef enum _displayType {
 class DisplayFactory
 {
 public:
-    static Display* GetDisplay(DisplayType displayType);
+    static Display* get_display(DisplayType displayType, SharedData *shared_data);
 };
