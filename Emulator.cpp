@@ -16,6 +16,26 @@ void Emulator::Init() {
     display->init();
 }
 
+void Emulator::run() {
+    std::thread cpu_thread{[this](){ this->run_cpu(); }};
+
+    run_display();
+    
+    cpu_thread.join();
+}
+
+void Emulator::run_cpu() {
+    while(shared_data->get_is_running()) {
+        cpu->run();
+    }
+}
+
+void Emulator::run_display() {
+    display->Draw();
+    
+    shared_data->set_is_running(false);
+}
+
 void Emulator::set_program_bytes(const char *bytes, int size) {
     for(int i = 0; i < size; i++) {
         // cpu->memory[i] = bytes[i];
