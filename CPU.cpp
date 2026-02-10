@@ -9,8 +9,11 @@ CPU::CPU(SharedData *shared_data) {
     pc = 0;
 
     this->shared_data = shared_data;
+
+    ppu = new PPU();
 }
 CPU::~CPU() {
+    delete ppu;
 }
 
 void CPU::init() {
@@ -19,6 +22,8 @@ void CPU::init() {
     std::fill(memory, memory + MEMORY_SIZE, 0);
 
     set_flag(I);
+
+    ppu->init();
 }
 void CPU::reset() {
     s -= 3;
