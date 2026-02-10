@@ -31,7 +31,7 @@ void Emulator::run_cpu() {
 }
 
 void Emulator::run_display() {
-    display->Draw();
+    display->draw();
     
     shared_data->set_is_running(false);
 }

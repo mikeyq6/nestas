@@ -8,6 +8,6 @@ public:
     SDLDisplay(SharedData *shared_data);
     ~SDLDisplay();
 
-    void Draw() override;
+    void draw() override;
     void init() override;
 };

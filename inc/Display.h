@@ -6,7 +6,7 @@ class Display {
 public:
     Display(SharedData *shared_data);
     virtual ~Display() = default;
-    virtual void Draw() = 0;
+    virtual void draw() = 0;
     
     virtual void init() = 0;
 

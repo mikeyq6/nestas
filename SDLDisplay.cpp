@@ -11,6 +11,6 @@ void SDLDisplay::init() {
     return;
 }
 
-void SDLDisplay::Draw() {
+void SDLDisplay::draw() {
     return;
 }
