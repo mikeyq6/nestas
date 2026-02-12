@@ -27,10 +27,13 @@ void SDLDisplay::init() {
 }
 
 void SDLDisplay::draw() {
+    uint8_t r, g, b;
+    uint16_t val;
+
     quit = false;
     SDL_Event e;
     while (!quit) {
-        while (SDL_PollEvent(&e) != 0) {
+        if (SDL_PollEvent(&e) != 0) {
 			// std::cout << e.type << std::endl;
 			switch(e.type) {
 				case SDL_QUIT: 
@@ -42,6 +45,12 @@ void SDLDisplay::draw() {
 					break;
 			}
         }
+        r = shared_data->get_random(255);
+        g = shared_data->get_random(255);
+        b = shared_data->get_random(255);
+        val = shared_data->get_random(NUM_PIXELS - 1);
+        pixels[val] = (r << 16) + (g << 8) + b;
+
 		// sdata->copy_pixels_to(pixels_buffer);
 		SDL_UpdateTexture(texture, NULL, pixels, SCREEN_WIDTH * sizeof(uint32_t));
 		SDL_RenderClear(renderer);

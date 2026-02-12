@@ -13,5 +13,5 @@ public:
 
 protected:
     SharedData *shared_data;
-    uint8_t pixels[NUM_PIXELS];
+    uint32_t pixels[NUM_PIXELS];
 };
