@@ -17,3 +17,12 @@ void SharedData::set_is_running(bool value) {
 
     is_running = value;
 }
+
+uint16_t SharedData::get_random(uint16_t max) {
+    // Init random number generator
+    std::random_device os_seed;
+    const u32 seed = os_seed();
+    engine generator(seed);
+    std::uniform_int_distribution<u32> distribute(0, max);
+    return distribute(generator);
+}
