@@ -20,6 +20,13 @@ enum FLAG {
     N = 0x80
 };
 
+typedef struct _instruction {
+    uint8_t opcode;
+    uint8_t operand1;
+    uint8_t operand2;
+    uint8_t cycles;
+} Instruction;
+
 class CPU {
 public:
     CPU(SharedData *shared_data);
@@ -46,6 +53,7 @@ private:
     bool is_set(FLAG flag);
 
     void get_next_instruction(uint8_t *inst);
+    void decode_instruction(uint8_t cur_inst, Instruction *inst);
 
     // stack operations
     void push(uint8_t value);

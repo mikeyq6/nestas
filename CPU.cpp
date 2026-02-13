@@ -33,11 +33,13 @@ void CPU::reset() {
 
 void CPU::run() {
     uint8_t cur_inst = 0;
+    Instruction inst;
     while(shared_data->get_is_running()) {
         // fetch
         get_next_instruction(&cur_inst);
 
         // decode
+        decode_instruction(cur_inst, &inst);
 
         // execute
 
@@ -47,6 +49,18 @@ void CPU::run() {
 
 void CPU::get_next_instruction(uint8_t *inst) {
     *inst = memory[pc++];
+}
+
+void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
+    switch(cur_inst) {
+        case 0x00: // BRK
+            inst->opcode = 0x00;
+            inst->cycles = 7;
+            break;
+        default:
+            inst->opcode = cur_inst;
+            inst->cycles = 2; // default cycle count for unknown instructions
+    }
 }
 
 void CPU::stop() {
