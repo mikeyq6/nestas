@@ -44,4 +44,10 @@ private:
     void set_flag(FLAG flag);
     void reset_flag(FLAG flag);
     bool is_set(FLAG flag);
+
+    void get_next_instruction(uint8_t *inst);
+
+    // stack operations
+    void push(uint8_t value);
+    uint8_t pull();
 };

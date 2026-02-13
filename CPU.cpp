@@ -32,9 +32,21 @@ void CPU::reset() {
 }
 
 void CPU::run() {
+    uint8_t cur_inst = 0;
     while(shared_data->get_is_running()) {
-        ;
+        // fetch
+        get_next_instruction(&cur_inst);
+
+        // decode
+
+        // execute
+
+        // check interrupts
     }
+}
+
+void CPU::get_next_instruction(uint8_t *inst) {
+    *inst = memory[pc++];
 }
 
 void CPU::stop() {
@@ -49,4 +61,14 @@ void CPU::reset_flag(FLAG flag) {
 }
 bool CPU::is_set(FLAG flag) {
     return (p & flag) != 0;
+}
+
+// stack operations
+void CPU::push(uint8_t value) {
+    memory[0x100 + s] = value;
+    s--;
+}
+uint8_t CPU::pull() {
+    s++;
+    return memory[0x100 + s];
 }
