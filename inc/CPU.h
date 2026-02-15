@@ -59,4 +59,7 @@ private:
     // stack operations
     void push(uint8_t value);
     uint8_t pull();
+
+    // Instruction execution
+    void adc(uint8_t value);
 };

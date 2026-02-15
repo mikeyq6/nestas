@@ -53,10 +53,34 @@ void CPU::get_next_instruction(uint8_t *inst) {
 }
 
 void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
+    inst->opcode = 0x00;
     switch(cur_inst) {
         case 0x00: // BRK
-            inst->opcode = 0x00;
             inst->cycles = 7;
+            break;
+        case 0x69: // ADC Immediate
+            inst->operand1 = memory[pc++];
+            inst->cycles = 2;
+            break;
+        case 0x65: // ADC Zero Page
+            inst->operand1 = memory[pc++];
+            inst->cycles = 3;
+            break;
+        case 0x75: // ADC Zero Page,X
+            inst->operand1 = memory[pc++];
+            inst->cycles = 4;
+            break;
+        case 0x6d: // ADC Absolute
+        case 0x7d: // ADC Absolute,X
+        case 0x79: // ADC Absolute,Y
+            inst->operand1 = memory[pc++];
+            inst->operand2 = memory[pc++];
+            inst->cycles = 4; // +1 if page crossed
+            break;
+        case 0x61: // ADC (Indirect,X)
+        case 0x71: // ADC (Indirect),Y
+            inst->operand1 = memory[pc++];
+            inst->cycles = 6;
             break;
         default:
             inst->opcode = cur_inst;
@@ -65,6 +89,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
 }
 
 void CPU::execute_instruction(Instruction *inst) {
+    uint32_t addr = 0;
     switch(inst->opcode) {
         case 0x00: // BRK
             set_flag(B);
@@ -72,7 +97,35 @@ void CPU::execute_instruction(Instruction *inst) {
             push(pc & 0xff);        // push low byte of PC
             push(p);                // push processor status
             set_flag(I);            // disable interrupts
-            pc = (memory[0xfffe] | (memory[0xffff] << 8)); // load interrupt vector
+            pc = (memory[0xfffd] | (memory[0xfffe] << 8)); // load interrupt vector
+            break;
+        case 0x69: // ADC Immediate
+            adc(inst->operand1);
+            break;
+        case 0x65: // ADC Zero Page
+            adc(memory[inst->operand1]);
+            break;
+        case 0x75: // ADC Zero Page,X
+            adc(memory[(inst->operand1 + x) & 0xff]);
+            break;
+        case 0x6d: // ADC Absolute
+            adc(memory[inst->operand2 << 8 | inst->operand1]);
+            break;
+        case 0x7d: // ADC Absolute,X
+            if(inst->operand1 + x > 0xff) inst->cycles++; // page crossed
+            adc(memory[((inst->operand2 << 8 | inst->operand1) + x) & 0xffff]);
+            break;
+        case 0x79: // ADC Absolute,Y
+            if(inst->operand1 + y > 0xff) inst->cycles++; // page crossed
+            adc(memory[((inst->operand2 << 8 | inst->operand1) + y) & 0xffff]);
+            break;
+        case 0x61:// ADC (Indirect,X)
+            addr = (memory[inst->operand1 + 1] << 8 | memory[inst->operand1]) + x;
+            adc(memory[addr & 0xffff]);
+            break;
+        case 0x71:// ADC (Indirect,Y)
+            addr = (memory[inst->operand1 + 1] << 8 | memory[inst->operand1]) + y;
+            adc(memory[addr & 0xffff]);
             break;
         default:
             // For unknown instructions, we can just ignore them or log an error.
@@ -102,4 +155,13 @@ void CPU::push(uint8_t value) {
 uint8_t CPU::pull() {
     s++;
     return memory[0x100 + s];
+}
+
+void CPU::adc(uint8_t value) {
+    uint16_t sum = a + value + (is_set(C) ? 1 : 0);
+    if(sum > 0xff) set_flag(C); else reset_flag(C);
+    if(sum == 0) set_flag(Z); else reset_flag(Z);
+    if(sum & 0x80) set_flag(N); else reset_flag(N);
+    if (((a ^ value) & 0x80) == 0 && ((a ^ sum) & 0x80) != 0) set_flag(V); else reset_flag(V);   
+    a = sum & 0xff;
 }
