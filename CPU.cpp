@@ -42,6 +42,7 @@ void CPU::run() {
         decode_instruction(cur_inst, &inst);
 
         // execute
+        execute_instruction(&inst);
 
         // check interrupts
     }
@@ -60,6 +61,22 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         default:
             inst->opcode = cur_inst;
             inst->cycles = 2; // default cycle count for unknown instructions
+    }
+}
+
+void CPU::execute_instruction(Instruction *inst) {
+    switch(inst->opcode) {
+        case 0x00: // BRK
+            set_flag(B);
+            push((pc >> 8) & 0xff); // push high byte of PC
+            push(pc & 0xff);        // push low byte of PC
+            push(p);                // push processor status
+            set_flag(I);            // disable interrupts
+            pc = (memory[0xfffe] | (memory[0xffff] << 8)); // load interrupt vector
+            break;
+        default:
+            // For unknown instructions, we can just ignore them or log an error.
+            break;
     }
 }
 
