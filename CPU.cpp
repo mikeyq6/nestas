@@ -109,6 +109,13 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
             inst->cycles = 2;
             break;
         case 0x90: // BCC Relative
+        case 0xb0: // BCS Relative
+        case 0xf0: // BEQ Relative
+        case 0xd0: // BNE Relative
+        case 0x30: // BMI Relative
+        case 0x10: // BPL Relative
+        case 0x50: // BVC Relative
+        case 0x70: // BVS Relative
             inst->operand1 = memory[pc++];
             inst->cycles = 2; // +1 if branch taken, +2 if page crossed
             break;
@@ -204,6 +211,69 @@ void CPU::execute_instruction(Instruction *inst) {
             break;
         case 0x90: // BCC Relative
             if(!is_set(C)) {
+                pc += (int8_t)inst->operand1; // branch offset is signed
+                inst->cycles++; // branch taken
+                if((pc & 0xff00) != ((pc - (int8_t)inst->operand1) & 0xff00)) {
+                    inst->cycles++; // page crossed
+                }
+            }
+            break;
+        case 0xb0: // BCS Relative
+            if(is_set(C)) {
+                pc += (int8_t)inst->operand1; // branch offset is signed
+                inst->cycles++; // branch taken
+                if((pc & 0xff00) != ((pc - (int8_t)inst->operand1) & 0xff00)) {
+                    inst->cycles++; // page crossed
+                }
+            }
+            break;
+        case 0xf0: // BEQ Relative
+            if(is_set(Z)) {
+                pc += (int8_t)inst->operand1; // branch offset is signed
+                inst->cycles++; // branch taken
+                if((pc & 0xff00) != ((pc - (int8_t)inst->operand1) & 0xff00)) {
+                    inst->cycles++; // page crossed
+                }
+            }
+            break;
+        case 0xd0: // BNE Relative
+            if(!is_set(Z)) {
+                pc += (int8_t)inst->operand1; // branch offset is signed
+                inst->cycles++; // branch taken
+                if((pc & 0xff00) != ((pc - (int8_t)inst->operand1) & 0xff00)) {
+                    inst->cycles++; // page crossed
+                }
+            }
+            break;
+        case 0x30: // BMI Relative
+            if(is_set(N)) {
+                pc += (int8_t)inst->operand1; // branch offset is signed
+                inst->cycles++; // branch taken
+                if((pc & 0xff00) != ((pc - (int8_t)inst->operand1) & 0xff00)) {
+                    inst->cycles++; // page crossed
+                }
+            }
+            break;
+        case 0x10: // BPL Relative
+            if(!is_set(N)) {
+                pc += (int8_t)inst->operand1; // branch offset is signed
+                inst->cycles++; // branch taken
+                if((pc & 0xff00) != ((pc - (int8_t)inst->operand1) & 0xff00)) {
+                    inst->cycles++; // page crossed
+                }
+            }
+            break;
+        case 0x50: // BVC Relative
+            if(!is_set(V)) {
+                pc += (int8_t)inst->operand1; // branch offset is signed
+                inst->cycles++; // branch taken
+                if((pc & 0xff00) != ((pc - (int8_t)inst->operand1) & 0xff00)) {
+                    inst->cycles++; // page crossed
+                }
+            }
+            break;
+        case 0x70: // BVS Relative
+            if(is_set(V)) {
                 pc += (int8_t)inst->operand1; // branch offset is signed
                 inst->cycles++; // branch taken
                 if((pc & 0xff00) != ((pc - (int8_t)inst->operand1) & 0xff00)) {
