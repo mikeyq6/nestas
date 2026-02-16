@@ -154,6 +154,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x0e: // ASL Absolute
         case 0xce: // DEC Absolute
         case 0xee: // INC Absolute
+        case 0x20: // JSR Absolute
             inst->operand1 = memory[pc++];
             inst->operand2 = memory[pc++];
             inst->cycles = 6;
@@ -502,6 +503,9 @@ void CPU::execute_instruction(Instruction *inst) {
             pc = (inst->operand2 << 8) | inst->operand1;
             break;
         case 0x6c: // JMP Indirect
+            pc = memory[(inst->operand2 << 8) | inst->operand1];
+            break;
+        case 0x20: // JSR Absolute
             push((pc >> 8) & 0xff); // push high byte of PC
             push(pc & 0xff);        // push low byte of PC
             pc = memory[(inst->operand2 << 8) | inst->operand1];
