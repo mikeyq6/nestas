@@ -60,17 +60,32 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
             break;
         case 0x69: // ADC Immediate
         case 0x29: // AND Immediate
+        case 0x90: // BCC Relative
+        case 0xb0: // BCS Relative
+        case 0xf0: // BEQ Relative
+        case 0xd0: // BNE Relative
+        case 0x30: // BMI Relative
+        case 0x10: // BPL Relative
+        case 0x50: // BVC Relative
+        case 0x70: // BVS Relative
+        case 0xc9: // CMP Immediate
+        case 0xe0: // CPX Immediate
+        case 0xc0: // CPY Immediate
             inst->operand1 = memory[pc++];
-            inst->cycles = 2;
+            inst->cycles = 2; // +1 if branch taken, +2 if page crossed
             break;
         case 0x65: // ADC Zero Page
         case 0x25: // AND Zero Page
         case 0x24: // BIT Zero Page
+        case 0xc5: // CMP Zero Page
+        case 0xe4: // CPX Zero Page
+        case 0xd4: // CPY Zero Page
             inst->operand1 = memory[pc++];
             inst->cycles = 3;
             break;
         case 0x75: // ADC Zero Page,X
         case 0x35: // AND Zero Page,X
+        case 0xd5: // CMP Zero Page,X
             inst->operand1 = memory[pc++];
             inst->cycles = 4;
             break;
@@ -81,6 +96,10 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x3d: // AND Absolute,X
         case 0x39: // AND Absolute,Y
         case 0x2c: // BIT Absolute
+        case 0xcd: // CMP Absolute
+        case 0xdd: // CMP Absolute,X
+        case 0xec: // CPX Absolute
+        case 0xcc: // CPY Absolute
             inst->operand1 = memory[pc++];
             inst->operand2 = memory[pc++];
             inst->cycles = 4; // +1 if page crossed
@@ -98,12 +117,14 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x61: // ADC (Indirect,X)
         case 0x21: // AND (Indirect,X)
         case 0x16: // ASL (Indirect,X)
+        case 0xc1: // CMP (Indirect,X)
             inst->operand1 = memory[pc++];
             inst->cycles = 6;
             break;
         case 0x71: // ADC (Indirect),Y
         case 0x31: // AND (Indirect),Y
         case 0x06: // ASL Zero Page
+        case 0xd1: // CMP (Indirect),Y
             inst->operand1 = memory[pc++];
             inst->cycles = 5; // +1 if page crossed
             break;
@@ -116,17 +137,6 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x58: // CLI Implied
             inst->cycles = 2;
             break;
-        case 0x90: // BCC Relative
-        case 0xb0: // BCS Relative
-        case 0xf0: // BEQ Relative
-        case 0xd0: // BNE Relative
-        case 0x30: // BMI Relative
-        case 0x10: // BPL Relative
-        case 0x50: // BVC Relative
-        case 0x70: // BVS Relative
-            inst->operand1 = memory[pc++];
-            inst->cycles = 2; // +1 if branch taken, +2 if page crossed
-            break;
         default:
             inst->opcode = cur_inst;
             inst->cycles = 2; // default cycle count for unknown instructions
@@ -135,6 +145,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
 
 void CPU::execute_instruction(Instruction *inst) {
     uint32_t addr = 0;
+    bool page_crossed = false;
     switch(inst->opcode) {
         case 0x00: // BRK
             set_flag(B);
@@ -169,7 +180,8 @@ void CPU::execute_instruction(Instruction *inst) {
             ADC(memory[addr & 0xffff]);
             break;
         case 0x71: // ADC (Indirect,Y)
-            addr = get_indirect_y_address(inst->operand1);
+            addr = get_indirect_y_address(inst->operand1, &page_crossed);
+            if(page_crossed) inst->cycles++; // page crossed
             ADC(memory[addr & 0xffff]);
             break;
         case 0x29: // AND Immediate
@@ -197,7 +209,8 @@ void CPU::execute_instruction(Instruction *inst) {
             AND(memory[addr & 0xffff]);
             break;
         case 0x31: // AND (Indirect),Y
-            addr = get_indirect_y_address(inst->operand1);
+            addr = get_indirect_y_address(inst->operand1, &page_crossed);
+            if(page_crossed) inst->cycles++; // page crossed
             AND(memory[addr & 0xffff]);
             break;
         case 0x0a: // ASL Accumulator
@@ -313,6 +326,52 @@ void CPU::execute_instruction(Instruction *inst) {
         case 0x58: // CLI Implied
             reset_flag(I);
             break;
+        case 0xc9: // CMP Immediate
+            CMP(a, inst->operand1);
+            break;
+        case 0xe0: // CPX Immediate
+            CMP(x, inst->operand1);
+            break;
+        case 0xc0: // CPY Immediate
+            CMP(y, inst->operand1);
+            break;
+        case 0xc5: // CMP Zero Page
+            CMP(a, memory[inst->operand1]);
+            break;
+        case 0xe4: // CPX Zero Page
+            CMP(x, memory[inst->operand1]);
+            break;
+        case 0xd4: // CPY Zero Page
+            CMP(y, memory[inst->operand1]);
+            break;
+        case 0xd5: // CMP Zero Page,X
+            CMP(a, memory[(inst->operand1 + x) & 0xff]);
+            break;
+        case 0xcd: // CMP Absolute
+            CMP(a, memory[inst->operand2 << 8 | inst->operand1]);
+            break;
+        case 0xec: // CPX Absolute
+            CMP(x, memory[inst->operand2 << 8 | inst->operand1]);
+            break;
+        case 0xcc: // CPY Absolute
+            CMP(y, memory[inst->operand2 << 8 | inst->operand1]);
+            break;
+        case 0xdd: // CMP Absolute,X
+            if(inst->operand1 + x > 0xff) inst->cycles++; // page crossed
+            CMP(a, memory[((inst->operand2 << 8 | inst->operand1) + x) & 0xffff]);
+            break;
+        case 0xd9: // CMP Absolute,Y
+            if(inst->operand1 + y > 0xff) inst->cycles++; // page crossed
+            CMP(a, memory[((inst->operand2 << 8 | inst->operand1) + y) & 0xffff]);
+            break;
+        case 0xc1: // CMP (Indirect,X)
+            addr = get_indirect_x_address(inst->operand1);
+            CMP(a, memory[addr & 0xffff]);
+        case 0xd1: // CMP (Indirect),Y
+            addr = get_indirect_y_address(inst->operand1, &page_crossed);
+            if(page_crossed) inst->cycles++; // page crossed
+            CMP(a, memory[addr & 0xffff]);
+            break;
         default:
             // For unknown instructions, we can just ignore them or log an error.
             break;
@@ -324,9 +383,10 @@ uint16_t CPU::get_indirect_x_address(uint8_t value) {
     uint8_t high = memory[(value + x + 1) & 0xff];
     return memory[((high << 8) + low) & 0xffff];
 }
-uint16_t CPU::get_indirect_y_address(uint8_t value) {
+uint16_t CPU::get_indirect_y_address(uint8_t value, bool *page_crossed) {
     uint8_t low = memory[value];
     uint8_t high = memory[value + 1];
+    *page_crossed = ((low + y) > 0xff);
     return (memory[((high << 8) + low) & 0xffff] + y) & 0xffff;
 }
 
@@ -382,4 +442,10 @@ void CPU::BIT(uint8_t value) {
     if(result == 0) set_flag(Z); else reset_flag(Z);
     if((result & 0x80) > 0) set_flag(N); else reset_flag(N); 
     if((result & 0x40) > 0) set_flag(V); else reset_flag(V);
+}
+
+void CPU::CMP(uint8_t val1, uint8_t val2) {
+    if(val1 >= val2) set_flag(C); else reset_flag(C);
+    if(val1 == val2) set_flag(Z); else reset_flag(Z);
+    if((val1 - val2) & 0x80) set_flag(N); else reset_flag(N);
 }

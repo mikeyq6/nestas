@@ -56,7 +56,7 @@ private:
     void decode_instruction(uint8_t cur_inst, Instruction *inst);
     void execute_instruction(Instruction *inst);
     uint16_t get_indirect_x_address(uint8_t value);
-    uint16_t get_indirect_y_address(uint8_t value);
+    uint16_t get_indirect_y_address(uint8_t value, bool *page_crossed);
 
     // stack operations
     void push(uint8_t value);
@@ -67,4 +67,5 @@ private:
     void AND(uint8_t value);
     uint8_t ASL(uint8_t value);
     void BIT(uint8_t value);
+    void CMP(uint8_t val1, uint8_t val2);
 };
