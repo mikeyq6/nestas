@@ -65,6 +65,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
             break;
         case 0x65: // ADC Zero Page
         case 0x25: // AND Zero Page
+        case 0x24: // BIT Zero Page
             inst->operand1 = memory[pc++];
             inst->cycles = 3;
             break;
@@ -79,6 +80,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x2d: // AND Absolute
         case 0x3d: // AND Absolute,X
         case 0x39: // AND Absolute,Y
+        case 0x2c: // BIT Absolute
             inst->operand1 = memory[pc++];
             inst->operand2 = memory[pc++];
             inst->cycles = 4; // +1 if page crossed
@@ -281,6 +283,12 @@ void CPU::execute_instruction(Instruction *inst) {
                 }
             }
             break;
+        case 0x24: // BIT Zero Page
+            BIT(memory[inst->operand1]);
+            break;
+        case 0x2c: // BIT Absolute
+            BIT(memory[inst->operand2 << 8 | inst->operand1]);
+            break;
         default:
             // For unknown instructions, we can just ignore them or log an error.
             break;
@@ -343,4 +351,11 @@ uint8_t CPU::ASL(uint8_t value) {
     if(value == 0) set_flag(Z); else reset_flag(Z);
     if(value & 0x80) set_flag(N); else reset_flag(N);
     return 0;
+}
+
+void CPU::BIT(uint8_t value) {
+    uint8_t result = a & value;
+    if(result == 0) set_flag(Z); else reset_flag(Z);
+    if((result & 0x80) > 0) set_flag(N); else reset_flag(N); 
+    if((result & 0x40) > 0) set_flag(V); else reset_flag(V);
 }

@@ -66,4 +66,5 @@ private:
     void ADC(uint8_t value);
     void AND(uint8_t value);
     uint8_t ASL(uint8_t value);
+    void BIT(uint8_t value);
 };
