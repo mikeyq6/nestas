@@ -108,6 +108,10 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0xa: // ASL Accumulator
             inst->cycles = 2;
             break;
+        case 0x90: // BCC Relative
+            inst->operand1 = memory[pc++];
+            inst->cycles = 2; // +1 if branch taken, +2 if page crossed
+            break;
         default:
             inst->opcode = cur_inst;
             inst->cycles = 2; // default cycle count for unknown instructions
@@ -197,6 +201,15 @@ void CPU::execute_instruction(Instruction *inst) {
         case 0x1e: // ASL Absolute,X
             addr = ((inst->operand2 << 8 | inst->operand1) + x) & 0xffff;
             memory[addr] = ASL(memory[addr]);
+            break;
+        case 0x90: // BCC Relative
+            if(!is_set(C)) {
+                pc += (int8_t)inst->operand1; // branch offset is signed
+                inst->cycles++; // branch taken
+                if((pc & 0xff00) != ((pc - (int8_t)inst->operand1) & 0xff00)) {
+                    inst->cycles++; // page crossed
+                }
+            }
             break;
         default:
             // For unknown instructions, we can just ignore them or log an error.
