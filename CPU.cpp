@@ -175,12 +175,12 @@ void CPU::execute_instruction(Instruction *inst) {
 uint16_t CPU::get_indirect_x_address(uint8_t value) {
     int8_t low = memory[(value + x) & 0xff];
     uint8_t high = memory[(value + x + 1) & 0xff];
-    return memory[high + low] * 256;
+    return memory[((high << 8) + low) & 0xffff];
 }
 uint16_t CPU::get_indirect_y_address(uint8_t value) {
     uint8_t low = memory[value];
     uint8_t high = memory[value + 1];
-    return (memory[(high << 8 + low) & 0xffff] + y) & 0xffff;
+    return (memory[((high << 8) + low) & 0xffff] + y) & 0xffff;
 }
 
 void CPU::stop() {
