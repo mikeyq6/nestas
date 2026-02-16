@@ -71,6 +71,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0xc9: // CMP Immediate
         case 0xe0: // CPX Immediate
         case 0xc0: // CPY Immediate
+        case 0x49: // EOR Immediate
             inst->operand1 = memory[pc++];
             inst->cycles = 2; // +1 if branch taken, +2 if page crossed
             break;
@@ -80,12 +81,14 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0xc5: // CMP Zero Page
         case 0xe4: // CPX Zero Page
         case 0xd4: // CPY Zero Page
+        case 0x45: // EOR Zero Page
             inst->operand1 = memory[pc++];
             inst->cycles = 3;
             break;
         case 0x75: // ADC Zero Page,X
         case 0x35: // AND Zero Page,X
         case 0xd5: // CMP Zero Page,X
+        case 0x55: // EOR Zero Page,X
             inst->operand1 = memory[pc++];
             inst->cycles = 4;
             break;
@@ -100,6 +103,9 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0xdd: // CMP Absolute,X
         case 0xec: // CPX Absolute
         case 0xcc: // CPY Absolute
+        case 0x4d: // EOR Absolute
+        case 0x5d: // EOR Absolute,X
+        case 0x59: // EOR Absolute,Y
             inst->operand1 = memory[pc++];
             inst->operand2 = memory[pc++];
             inst->cycles = 4; // +1 if page crossed
@@ -121,6 +127,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x16: // ASL (Indirect,X)
         case 0xc1: // CMP (Indirect,X)
         case 0xd6: // DEC (Indirect,X)
+        case 0x41: // EOR (Indirect,X)
             inst->operand1 = memory[pc++];
             inst->cycles = 6;
             break;
@@ -129,6 +136,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x06: // ASL Zero Page
         case 0xd1: // CMP (Indirect),Y
         case 0xc6: // DEC Zero Page
+        case 0x51: // EOR (Indirect),Y
             inst->operand1 = memory[pc++];
             inst->cycles = 5; // +1 if page crossed
             break;
@@ -412,6 +420,35 @@ void CPU::execute_instruction(Instruction *inst) {
             if(y == 0) set_flag(Z); else reset_flag(Z);
             if(y & 0x80) set_flag(N); else reset_flag(N);
             break;
+        case 0x49: // EOR Immediate
+            EOR(inst->operand1);
+            break;
+        case 0x45: // EOR Zero Page
+            EOR(memory[inst->operand1]);
+            break;
+        case 0x55: // EOR Zero Page,X
+            EOR(memory[(inst->operand1 + x) & 0xff]);
+            break;
+        case 0x4d: // EOR Absolute
+            EOR(memory[inst->operand2 << 8 | inst->operand1]);
+            break;
+        case 0x5d: // EOR Absolute,X
+            if(inst->operand1 + x > 0xff) inst->cycles++; // page crossed
+            EOR(memory[((inst->operand2 << 8 | inst->operand1) + x) & 0xffff]);
+            break;
+        case 0x59: // EOR Absolute,Y
+            if(inst->operand1 + y > 0xff) inst->cycles++; // page crossed
+            EOR(memory[((inst->operand2 << 8 | inst->operand1) + y) & 0xffff]);
+            break;
+        case 0x41: // EOR (Indirect,X)
+            addr = get_indirect_x_address(inst->operand1);
+            EOR(memory[addr & 0xffff]);
+            break;
+        case 0x51: // EOR (Indirect),Y
+            addr = get_indirect_y_address(inst->operand1, &page_crossed);
+            if(page_crossed) inst->cycles++; // page crossed
+            EOR(memory[addr & 0xffff]);
+            break;
         case 0xea: // NOP Implied
             break;
         default:
@@ -490,4 +527,9 @@ void CPU::CMP(uint8_t val1, uint8_t val2) {
     if(val1 >= val2) set_flag(C); else reset_flag(C);
     if(val1 == val2) set_flag(Z); else reset_flag(Z);
     if((val1 - val2) & 0x80) set_flag(N); else reset_flag(N);
+}
+void CPU::EOR(uint8_t value) {
+    a = a ^ value;
+    if(a == 0) set_flag(Z); else reset_flag(Z);
+    if(a & 0x80) set_flag(N); else reset_flag(N);
 }

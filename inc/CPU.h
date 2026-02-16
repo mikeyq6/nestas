@@ -68,4 +68,5 @@ private:
     uint8_t ASL(uint8_t value);
     void BIT(uint8_t value);
     void CMP(uint8_t val1, uint8_t val2);
+    void EOR(uint8_t value);
 };
