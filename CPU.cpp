@@ -180,7 +180,7 @@ uint16_t CPU::get_indirect_x_address(uint8_t value) {
 uint16_t CPU::get_indirect_y_address(uint8_t value) {
     uint8_t low = memory[value];
     uint8_t high = memory[value + 1];
-    return memory[(high + low) & 0xff] * 256 + y;
+    return (memory[(high << 8 + low) & 0xffff] + y) & 0xffff;
 }
 
 void CPU::stop() {
