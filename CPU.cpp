@@ -105,11 +105,13 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
             inst->cycles = 4; // +1 if page crossed
             break;
         case 0x0e: // ASL Absolute
+        case 0xce: // DEC Absolute
             inst->operand1 = memory[pc++];
             inst->operand2 = memory[pc++];
             inst->cycles = 6;
             break;
         case 0x1e: // ASL Absolute,X
+        case 0xde: // DEC Absolute,X
             inst->operand1 = memory[pc++];
             inst->operand2 = memory[pc++];
             inst->cycles = 7;
@@ -118,6 +120,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x21: // AND (Indirect,X)
         case 0x16: // ASL (Indirect,X)
         case 0xc1: // CMP (Indirect,X)
+        case 0xd6: // DEC (Indirect,X)
             inst->operand1 = memory[pc++];
             inst->cycles = 6;
             break;
@@ -125,6 +128,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x31: // AND (Indirect),Y
         case 0x06: // ASL Zero Page
         case 0xd1: // CMP (Indirect),Y
+        case 0xc6: // DEC Zero Page
             inst->operand1 = memory[pc++];
             inst->cycles = 5; // +1 if page crossed
             break;
@@ -136,6 +140,8 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0xb8: // CLV Implied
         case 0x58: // CLI Implied
         case 0xea: // NOP Implied
+        case 0xca: // DEX Implied
+        case 0x88: // DEY Implied
             inst->cycles = 2;
             break;
         default:
@@ -372,6 +378,39 @@ void CPU::execute_instruction(Instruction *inst) {
             addr = get_indirect_y_address(inst->operand1, &page_crossed);
             if(page_crossed) inst->cycles++; // page crossed
             CMP(a, memory[addr & 0xffff]);
+            break;
+        case 0xc6: // DEC Zero Page
+            memory[inst->operand1]--;
+            if(memory[inst->operand1] == 0) set_flag(Z); else reset_flag(Z);
+            if(memory[inst->operand1] & 0x80) set_flag(N); else reset_flag(N);
+            break;
+        case 0xd6: // DEC Zero Page,X
+            addr = (inst->operand1 + x) & 0xff;
+            memory[addr]--;
+            if(memory[addr] == 0) set_flag(Z); else reset_flag(Z);
+            if(memory[addr] & 0x80) set_flag(N); else reset_flag(N);
+            break;
+        case 0xce: // DEC Absolute
+            addr = inst->operand2 << 8 | inst->operand1;
+            memory[addr]--;
+            if(memory[addr] == 0) set_flag(Z); else reset_flag(Z);
+            if(memory[addr] & 0x80) set_flag(N); else reset_flag(N);
+            break;
+        case 0xde: // DEC Absolute,X
+            addr = ((inst->operand2 << 8 | inst->operand1) + x) & 0xffff;
+            memory[addr]--;
+            if(memory[addr] == 0) set_flag(Z); else reset_flag(Z);
+            if(memory[addr] & 0x80) set_flag(N); else reset_flag(N);
+            break;
+        case 0xca: // DEX Implied
+            x--;
+            if(x == 0) set_flag(Z); else reset_flag(Z);
+            if(x & 0x80) set_flag(N); else reset_flag(N);
+            break;
+        case 0x88: // DEY Implied
+            y--;
+            if(y == 0) set_flag(Z); else reset_flag(Z);
+            if(y & 0x80) set_flag(N); else reset_flag(N);
             break;
         case 0xea: // NOP Implied
             break;
