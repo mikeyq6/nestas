@@ -59,28 +59,39 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
             inst->cycles = 7;
             break;
         case 0x69: // ADC Immediate
+        case 0x29: // AND Immediate
             inst->operand1 = memory[pc++];
             inst->cycles = 2;
             break;
         case 0x65: // ADC Zero Page
+        case 0x25: // AND Zero Page
             inst->operand1 = memory[pc++];
             inst->cycles = 3;
             break;
         case 0x75: // ADC Zero Page,X
+        case 0x35: // AND Zero Page,X
             inst->operand1 = memory[pc++];
             inst->cycles = 4;
             break;
         case 0x6d: // ADC Absolute
         case 0x7d: // ADC Absolute,X
         case 0x79: // ADC Absolute,Y
+        case 0x2d: // AND Absolute
+        case 0x3d: // AND Absolute,X
+        case 0x39: // AND Absolute,Y
             inst->operand1 = memory[pc++];
             inst->operand2 = memory[pc++];
             inst->cycles = 4; // +1 if page crossed
             break;
         case 0x61: // ADC (Indirect,X)
-        case 0x71: // ADC (Indirect),Y
+        case 0x21: // AND (Indirect,X)
             inst->operand1 = memory[pc++];
             inst->cycles = 6;
+            break;
+        case 0x71: // ADC (Indirect),Y
+        case 0x31: // AND (Indirect),Y
+            inst->operand1 = memory[pc++];
+            inst->cycles = 5; // +1 if page crossed
             break;
         default:
             inst->opcode = cur_inst;
@@ -97,7 +108,7 @@ void CPU::execute_instruction(Instruction *inst) {
             push(pc & 0xff);        // push low byte of PC
             push(p);                // push processor status
             set_flag(I);            // disable interrupts
-            pc = (memory[0xfffd] | (memory[0xfffe] << 8)); // load interrupt vector
+            pc = (memory[0xfffe] | (memory[0xffff] << 8)); // load interrupt vector
             break;
         case 0x69: // ADC Immediate
             adc(inst->operand1);
@@ -119,13 +130,41 @@ void CPU::execute_instruction(Instruction *inst) {
             if(inst->operand1 + y > 0xff) inst->cycles++; // page crossed
             adc(memory[((inst->operand2 << 8 | inst->operand1) + y) & 0xffff]);
             break;
-        case 0x61:// ADC (Indirect,X)
-            addr = (memory[inst->operand1 + 1] << 8 | memory[inst->operand1]) + x;
+        case 0x61: // ADC (Indirect,X)
+            addr = get_indirect_x_address(inst->operand1);
             adc(memory[addr & 0xffff]);
             break;
-        case 0x71:// ADC (Indirect,Y)
-            addr = (memory[inst->operand1 + 1] << 8 | memory[inst->operand1]) + y;
+        case 0x71: // ADC (Indirect,Y)
+            addr = get_indirect_y_address(inst->operand1);
             adc(memory[addr & 0xffff]);
+            break;
+        case 0x29: // AND Immediate
+            land(inst->operand1);
+            break;
+        case 0x25: // AND Zero Page
+            land(memory[inst->operand1]);
+            break;
+        case 0x35: // AND Zero Page,X
+            land(memory[(inst->operand1 + x) & 0xff]);
+            break;
+        case 0x2d: // AND Absolute
+            land(memory[inst->operand2 << 8 | inst->operand1]);
+            break;
+        case 0x3d: // AND Absolute,X
+            if(inst->operand1 + x > 0xff) inst->cycles++; // page crossed
+            land(memory[((inst->operand2 << 8 | inst->operand1) + x) & 0xffff]);
+            break;
+        case 0x39: // AND Absolute,Y
+            if(inst->operand1 + y > 0xff) inst->cycles++; // page crossed
+            land(memory[((inst->operand2 << 8 | inst->operand1) + y) & 0xffff]);
+            break;
+        case 0x21: // AND (Indirect,X)
+            addr = get_indirect_x_address(inst->operand1);
+            land(memory[addr & 0xffff]);
+            break;
+        case 0x31: // AND (Indirect),Y
+            addr = get_indirect_y_address(inst->operand1);
+            land(memory[addr & 0xffff]);
             break;
         default:
             // For unknown instructions, we can just ignore them or log an error.
@@ -175,4 +214,10 @@ void CPU::adc(uint8_t value) {
     if(sum & 0x80) set_flag(N); else reset_flag(N);
     if (((a ^ value) & 0x80) == 0 && ((a ^ sum) & 0x80) != 0) set_flag(V); else reset_flag(V);   
     a = sum & 0xff;
+}
+
+void CPU::land(uint8_t value) {
+    a &= value;
+    if(a == 0) set_flag(Z); else reset_flag(Z);
+    if(a & 0x80) set_flag(N); else reset_flag(N);
 }

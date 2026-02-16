@@ -64,4 +64,5 @@ private:
 
     // Instruction execution
     void adc(uint8_t value);
+    void land(uint8_t value);
 };
