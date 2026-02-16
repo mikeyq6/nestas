@@ -108,6 +108,12 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
             inst->cycles = 5; // +1 if page crossed
             break;
         case 0xa: // ASL Accumulator
+        case 0x18: // CLC Implied
+        case 0x38: // SEC Implied
+        case 0xd8: // CLD Implied
+        case 0xf8: // SED Implied
+        case 0xb8: // CLV Implied
+        case 0x58: // CLI Implied
             inst->cycles = 2;
             break;
         case 0x90: // BCC Relative
@@ -288,6 +294,24 @@ void CPU::execute_instruction(Instruction *inst) {
             break;
         case 0x2c: // BIT Absolute
             BIT(memory[inst->operand2 << 8 | inst->operand1]);
+            break;
+        case 0x18: // CLC Implied
+            reset_flag(C);
+            break;
+        case 0x38: // SEC Implied
+            set_flag(C);
+            break;
+        case 0xd8: // CLD Implied
+            reset_flag(D);
+            break;
+        case 0xf8: // SED Implied
+            set_flag(D);
+            break;
+        case 0xb8: // CLV Implied
+            reset_flag(V);
+            break;
+        case 0x58: // CLI Implied
+            reset_flag(I);
             break;
         default:
             // For unknown instructions, we can just ignore them or log an error.
