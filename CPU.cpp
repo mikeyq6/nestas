@@ -83,15 +83,30 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
             inst->operand2 = memory[pc++];
             inst->cycles = 4; // +1 if page crossed
             break;
+        case 0x0e: // ASL Absolute
+            inst->operand1 = memory[pc++];
+            inst->operand2 = memory[pc++];
+            inst->cycles = 6;
+            break;
+        case 0x1e: // ASL Absolute,X
+            inst->operand1 = memory[pc++];
+            inst->operand2 = memory[pc++];
+            inst->cycles = 7;
+            break;
         case 0x61: // ADC (Indirect,X)
         case 0x21: // AND (Indirect,X)
+        case 0x16: // ASL (Indirect,X)
             inst->operand1 = memory[pc++];
             inst->cycles = 6;
             break;
         case 0x71: // ADC (Indirect),Y
         case 0x31: // AND (Indirect),Y
+        case 0x06: // ASL Zero Page
             inst->operand1 = memory[pc++];
             inst->cycles = 5; // +1 if page crossed
+            break;
+        case 0xa: // ASL Accumulator
+            inst->cycles = 2;
             break;
         default:
             inst->opcode = cur_inst;
@@ -166,6 +181,23 @@ void CPU::execute_instruction(Instruction *inst) {
             addr = get_indirect_y_address(inst->operand1);
             AND(memory[addr & 0xffff]);
             break;
+        case 0x0a: // ASL Accumulator
+            a = ASL(a);
+            break;
+        case 0x06: // ASL Zero Page
+            memory[inst->operand1] = ASL(memory[inst->operand1]);
+            break;
+        case 0x16: // ASL Zero Page,X
+            memory[(inst->operand1 + x) & 0xff] = ASL(memory[(inst->operand1 + x) & 0xff]);
+            break;
+        case 0x0e: // ASL Absolute
+            addr = inst->operand2 << 8 | inst->operand1;
+            memory[addr] = ASL(memory[addr]);
+            break;
+        case 0x1e: // ASL Absolute,X
+            addr = ((inst->operand2 << 8 | inst->operand1) + x) & 0xffff;
+            memory[addr] = ASL(memory[addr]);
+            break;
         default:
             // For unknown instructions, we can just ignore them or log an error.
             break;
@@ -220,4 +252,8 @@ void CPU::AND(uint8_t value) {
     a &= value;
     if(a == 0) set_flag(Z); else reset_flag(Z);
     if(a & 0x80) set_flag(N); else reset_flag(N);
+}
+
+uint8_t CPU::ASL(uint8_t value) {
+    return 0;
 }
