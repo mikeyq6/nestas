@@ -135,6 +135,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0xf8: // SED Implied
         case 0xb8: // CLV Implied
         case 0x58: // CLI Implied
+        case 0xea: // NOP Implied
             inst->cycles = 2;
             break;
         default:
@@ -371,6 +372,8 @@ void CPU::execute_instruction(Instruction *inst) {
             addr = get_indirect_y_address(inst->operand1, &page_crossed);
             if(page_crossed) inst->cycles++; // page crossed
             CMP(a, memory[addr & 0xffff]);
+            break;
+        case 0xea: // NOP Implied
             break;
         default:
             // For unknown instructions, we can just ignore them or log an error.
