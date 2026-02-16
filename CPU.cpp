@@ -96,6 +96,11 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
             inst->operand1 = memory[pc++];
             inst->cycles = 3;
             break;
+        case 0x4c: // JMP Absolute
+            inst->operand1 = memory[pc++];
+            inst->operand2 = memory[pc++];
+            inst->cycles = 3;
+            break;
         case 0x75: // ADC Zero Page,X
         case 0x35: // AND Zero Page,X
         case 0xd5: // CMP Zero Page,X
@@ -129,6 +134,11 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x51: // EOR (Indirect),Y
         case 0xe6: // INC Zero Page
             inst->operand1 = memory[pc++];
+            inst->cycles = 5; // +1 if page crossed
+            break;
+        case 0x6c: // JMP Indirect
+            inst->operand1 = memory[pc++];
+            inst->operand2 = memory[pc++];
             inst->cycles = 5; // +1 if page crossed
             break;
         case 0x61: // ADC (Indirect,X)
@@ -487,6 +497,14 @@ void CPU::execute_instruction(Instruction *inst) {
             y++;
             if(y == 0) set_flag(Z); else reset_flag(Z);
             if(y & 0x80) set_flag(N); else reset_flag(N);
+            break;
+        case 0x4c: // JMP Absolute
+            pc = (inst->operand2 << 8) | inst->operand1;
+            break;
+        case 0x6c: // JMP Indirect
+            push((pc >> 8) & 0xff); // push high byte of PC
+            push(pc & 0xff);        // push low byte of PC
+            pc = memory[(inst->operand2 << 8) | inst->operand1];
             break;
         case 0xea: // NOP Implied
             break;
