@@ -255,5 +255,9 @@ void CPU::AND(uint8_t value) {
 }
 
 uint8_t CPU::ASL(uint8_t value) {
+    if(value & 0x80) set_flag(C); else reset_flag(C);
+    value <<= 1;
+    if(value == 0) set_flag(Z); else reset_flag(Z);
+    if(value & 0x80) set_flag(N); else reset_flag(N);
     return 0;
 }
