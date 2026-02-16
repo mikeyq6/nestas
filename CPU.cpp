@@ -131,6 +131,17 @@ void CPU::execute_instruction(Instruction *inst) {
             // For unknown instructions, we can just ignore them or log an error.
             break;
     }
+}    
+
+uint16_t CPU::get_indirect_x_address(uint8_t value) {
+    int8_t low = memory[(value + x) & 0xff];
+    uint8_t high = memory[(value + x + 1) & 0xff];
+    return memory[high + low] * 256;
+}
+uint16_t CPU::get_indirect_y_address(uint8_t value) {
+    uint8_t low = memory[value];
+    uint8_t high = memory[value + 1];
+    return memory[(high + low) & 0xff] * 256 + y;
 }
 
 void CPU::stop() {

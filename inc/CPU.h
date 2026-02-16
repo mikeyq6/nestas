@@ -55,6 +55,8 @@ private:
     void get_next_instruction(uint8_t *inst);
     void decode_instruction(uint8_t cur_inst, Instruction *inst);
     void execute_instruction(Instruction *inst);
+    uint16_t get_indirect_x_address(uint8_t value);
+    uint16_t get_indirect_y_address(uint8_t value);
 
     // stack operations
     void push(uint8_t value);
