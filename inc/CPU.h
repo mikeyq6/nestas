@@ -63,6 +63,6 @@ private:
     uint8_t pull();
 
     // Instruction execution
-    void adc(uint8_t value);
-    void land(uint8_t value);
+    void ADC(uint8_t value);
+    void AND(uint8_t value);
 };

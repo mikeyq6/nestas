@@ -111,60 +111,60 @@ void CPU::execute_instruction(Instruction *inst) {
             pc = (memory[0xfffe] | (memory[0xffff] << 8)); // load interrupt vector
             break;
         case 0x69: // ADC Immediate
-            adc(inst->operand1);
+            ADC(inst->operand1);
             break;
         case 0x65: // ADC Zero Page
-            adc(memory[inst->operand1]);
+            ADC(memory[inst->operand1]);
             break;
         case 0x75: // ADC Zero Page,X
-            adc(memory[(inst->operand1 + x) & 0xff]);
+            ADC(memory[(inst->operand1 + x) & 0xff]);
             break;
         case 0x6d: // ADC Absolute
-            adc(memory[inst->operand2 << 8 | inst->operand1]);
+            ADC(memory[inst->operand2 << 8 | inst->operand1]);
             break;
         case 0x7d: // ADC Absolute,X
             if(inst->operand1 + x > 0xff) inst->cycles++; // page crossed
-            adc(memory[((inst->operand2 << 8 | inst->operand1) + x) & 0xffff]);
+            ADC(memory[((inst->operand2 << 8 | inst->operand1) + x) & 0xffff]);
             break;
         case 0x79: // ADC Absolute,Y
             if(inst->operand1 + y > 0xff) inst->cycles++; // page crossed
-            adc(memory[((inst->operand2 << 8 | inst->operand1) + y) & 0xffff]);
+            ADC(memory[((inst->operand2 << 8 | inst->operand1) + y) & 0xffff]);
             break;
         case 0x61: // ADC (Indirect,X)
             addr = get_indirect_x_address(inst->operand1);
-            adc(memory[addr & 0xffff]);
+            ADC(memory[addr & 0xffff]);
             break;
         case 0x71: // ADC (Indirect,Y)
             addr = get_indirect_y_address(inst->operand1);
-            adc(memory[addr & 0xffff]);
+            ADC(memory[addr & 0xffff]);
             break;
         case 0x29: // AND Immediate
-            land(inst->operand1);
+            AND(inst->operand1);
             break;
         case 0x25: // AND Zero Page
-            land(memory[inst->operand1]);
+            AND(memory[inst->operand1]);
             break;
         case 0x35: // AND Zero Page,X
-            land(memory[(inst->operand1 + x) & 0xff]);
+            AND(memory[(inst->operand1 + x) & 0xff]);
             break;
         case 0x2d: // AND Absolute
-            land(memory[inst->operand2 << 8 | inst->operand1]);
+            AND(memory[inst->operand2 << 8 | inst->operand1]);
             break;
         case 0x3d: // AND Absolute,X
             if(inst->operand1 + x > 0xff) inst->cycles++; // page crossed
-            land(memory[((inst->operand2 << 8 | inst->operand1) + x) & 0xffff]);
+            AND(memory[((inst->operand2 << 8 | inst->operand1) + x) & 0xffff]);
             break;
         case 0x39: // AND Absolute,Y
             if(inst->operand1 + y > 0xff) inst->cycles++; // page crossed
-            land(memory[((inst->operand2 << 8 | inst->operand1) + y) & 0xffff]);
+            AND(memory[((inst->operand2 << 8 | inst->operand1) + y) & 0xffff]);
             break;
         case 0x21: // AND (Indirect,X)
             addr = get_indirect_x_address(inst->operand1);
-            land(memory[addr & 0xffff]);
+            AND(memory[addr & 0xffff]);
             break;
         case 0x31: // AND (Indirect),Y
             addr = get_indirect_y_address(inst->operand1);
-            land(memory[addr & 0xffff]);
+            AND(memory[addr & 0xffff]);
             break;
         default:
             // For unknown instructions, we can just ignore them or log an error.
@@ -207,7 +207,7 @@ uint8_t CPU::pull() {
     return memory[0x100 + s];
 }
 
-void CPU::adc(uint8_t value) {
+void CPU::ADC(uint8_t value) {
     uint16_t sum = a + value + (is_set(C) ? 1 : 0);
     if(sum > 0xff) set_flag(C); else reset_flag(C);
     if(sum == 0) set_flag(Z); else reset_flag(Z);
@@ -216,7 +216,7 @@ void CPU::adc(uint8_t value) {
     a = sum & 0xff;
 }
 
-void CPU::land(uint8_t value) {
+void CPU::AND(uint8_t value) {
     a &= value;
     if(a == 0) set_flag(Z); else reset_flag(Z);
     if(a & 0x80) set_flag(N); else reset_flag(N);
