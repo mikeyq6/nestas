@@ -27,7 +27,7 @@ void CPU::init() {
 }
 void CPU::reset() {
     s -= 3;
-    pc = (memory[0xfffc] | (memory[0xfffd] << 8));
+    pc = (read_memory(0xfffc) | (read_memory(0xfffd) << 8));
     set_flag(I);
 }
 
@@ -238,16 +238,16 @@ void CPU::execute_instruction(Instruction *inst) {
             push(pc & 0xff);        // push low byte of PC
             push(p);                // push processor status
             set_flag(I);            // disable interrupts
-            pc = (memory[0xfffe] | (memory[0xffff] << 8)); // load interrupt vector
+            pc = (read_memory(0xfffe) | (read_memory(0xffff) << 8)); // load interrupt vector
             break;
         case 0x69: // ADC Immediate
             ADC(inst->operand1);
             break;
         case 0x65: // ADC Zero Page
-            ADC(memory[inst->operand1]);
+            ADC(read_memory(inst->operand1));
             break;
         case 0x75: // ADC Zero Page,X
-            ADC(memory[(inst->operand1 + x) & 0xff]);
+            ADC(read_memory((inst->operand1 + x) & 0xff));
             break;
         case 0x6d: // ADC Absolute
             ADC(read_memory(inst->operand2 << 8 | inst->operand1));
@@ -273,10 +273,10 @@ void CPU::execute_instruction(Instruction *inst) {
             AND(inst->operand1);
             break;
         case 0x25: // AND Zero Page
-            AND(memory[inst->operand1]);
+            AND(read_memory(inst->operand1));
             break;
         case 0x35: // AND Zero Page,X
-            AND(memory[(inst->operand1 + x) & 0xff]);
+            AND(read_memory((inst->operand1 + x) & 0xff));
             break;
         case 0x2d: // AND Absolute
             AND(read_memory(inst->operand2 << 8 | inst->operand1));
@@ -302,10 +302,10 @@ void CPU::execute_instruction(Instruction *inst) {
             a = ASL(a);
             break;
         case 0x06: // ASL Zero Page
-            memory[inst->operand1] = ASL(memory[inst->operand1]);
+            write_memory(inst->operand1, ASL(read_memory(inst->operand1)));
             break;
         case 0x16: // ASL Zero Page,X
-            memory[(inst->operand1 + x) & 0xff] = ASL(memory[(inst->operand1 + x) & 0xff]);
+            write_memory((inst->operand1 + x) & 0xff, ASL(read_memory((inst->operand1 + x) & 0xff)));
             break;
         case 0x0e: // ASL Absolute
             addr = inst->operand2 << 8 | inst->operand1;
@@ -388,7 +388,7 @@ void CPU::execute_instruction(Instruction *inst) {
             }
             break;
         case 0x24: // BIT Zero Page
-            BIT(memory[inst->operand1]);
+            BIT(read_memory(inst->operand1));
             break;
         case 0x2c: // BIT Absolute
             BIT(read_memory(inst->operand2 << 8 | inst->operand1));
@@ -421,16 +421,16 @@ void CPU::execute_instruction(Instruction *inst) {
             CMP(y, inst->operand1);
             break;
         case 0xc5: // CMP Zero Page
-            CMP(a, memory[inst->operand1]);
+            CMP(a, read_memory(inst->operand1));
             break;
         case 0xe4: // CPX Zero Page
-            CMP(x, memory[inst->operand1]);
+            CMP(x, read_memory(inst->operand1));
             break;
         case 0xd4: // CPY Zero Page
-            CMP(y, memory[inst->operand1]);
+            CMP(y, read_memory(inst->operand1));
             break;
         case 0xd5: // CMP Zero Page,X
-            CMP(a, memory[(inst->operand1 + x) & 0xff]);
+            CMP(a, read_memory((inst->operand1 + x) & 0xff));
             break;
         case 0xcd: // CMP Absolute
             CMP(a, read_memory(inst->operand2 << 8 | inst->operand1));
@@ -458,9 +458,9 @@ void CPU::execute_instruction(Instruction *inst) {
             CMP(a, read_memory(addr & 0xffff));
             break;
         case 0xc6: // DEC Zero Page
-            memory[inst->operand1]--;
-            if(memory[inst->operand1] == 0) set_flag(Z); else reset_flag(Z);
-            if(memory[inst->operand1] & 0x80) set_flag(N); else reset_flag(N);
+            write_memory(inst->operand1, read_memory(inst->operand1) - 1);
+            if(read_memory(inst->operand1) == 0) set_flag(Z); else reset_flag(Z);
+            if(read_memory(inst->operand1) & 0x80) set_flag(N); else reset_flag(N);
             break;
         case 0xd6: // DEC Zero Page,X
             addr = (inst->operand1 + x) & 0xff;
@@ -494,10 +494,10 @@ void CPU::execute_instruction(Instruction *inst) {
             EOR(inst->operand1);
             break;
         case 0x45: // EOR Zero Page
-            EOR(memory[inst->operand1]);
+            EOR(read_memory(inst->operand1));
             break;
         case 0x55: // EOR Zero Page,X
-            EOR(memory[(inst->operand1 + x) & 0xff]);
+            EOR(read_memory((inst->operand1 + x) & 0xff));
             break;
         case 0x4d: // EOR Absolute
             EOR(read_memory(inst->operand2 << 8 | inst->operand1));
@@ -520,15 +520,15 @@ void CPU::execute_instruction(Instruction *inst) {
             EOR(read_memory(addr & 0xffff));
             break;
         case 0xe6: // INC Zero Page
-            memory[inst->operand1]++;
-            if(memory[inst->operand1] == 0) set_flag(Z); else reset_flag(Z);
-            if(memory[inst->operand1] & 0x80) set_flag(N); else reset_flag(N);
+            write_memory(inst->operand1, read_memory(inst->operand1) + 1);
+            if(read_memory(inst->operand1) == 0) set_flag(Z); else reset_flag(Z);
+            if(read_memory(inst->operand1) & 0x80) set_flag(N); else reset_flag(N);
             break;
         case 0xf6: // INC Zero Page,X
             addr = (inst->operand1 + x) & 0xff;
-            memory[addr]++;
-            if(memory[addr] == 0) set_flag(Z); else reset_flag(Z);
-            if(memory[addr] & 0x80) set_flag(N); else reset_flag(N);
+            write_memory(addr, read_memory(addr) + 1);
+            if(read_memory(addr) == 0) set_flag(Z); else reset_flag(Z);
+            if(read_memory(addr) & 0x80) set_flag(N); else reset_flag(N);
             break;
         case 0xee: // INC Absolute
             addr = inst->operand2 << 8 | inst->operand1;
@@ -568,10 +568,10 @@ void CPU::execute_instruction(Instruction *inst) {
             LDN(&a, inst->operand1);
             break;
         case 0xa5: // LDA Zero Page
-            LDN(&a, memory[inst->operand1]);
+            LDN(&a, read_memory(inst->operand1));
             break;
         case 0xb5: // LDA Zero Page,X
-            LDN(&a, memory[(inst->operand1 + x) & 0xff]);
+            LDN(&a, read_memory((inst->operand1 + x) & 0xff));
             break;
         case 0xad: // LDA Absolute
             LDN(&a, read_memory(inst->operand2 << 8 | inst->operand1));
@@ -597,10 +597,10 @@ void CPU::execute_instruction(Instruction *inst) {
             LDN(&x, inst->operand1);
             break;
         case 0xa6: // LDX Zero Page
-            LDN(&x, memory[inst->operand1]);
+            LDN(&x, read_memory(inst->operand1));
             break;
         case 0xb6: // LDX Zero Page,Y
-            LDN(&x, memory[(inst->operand1 + y) & 0xff]);
+            LDN(&x, read_memory((inst->operand1 + y) & 0xff));
             break;
         case 0xae: // LDX Absolute
             LDN(&x, read_memory(inst->operand2 << 8 | inst->operand1));
@@ -613,10 +613,10 @@ void CPU::execute_instruction(Instruction *inst) {
             LDN(&y, inst->operand1);
             break;
         case 0xa4: // LDY Zero Page
-            LDN(&y, memory[inst->operand1]);
+            LDN(&y, read_memory(inst->operand1));
             break;
         case 0xb4: // LDY Zero Page,X
-            LDN(&y, memory[(inst->operand1 + x) & 0xff]);
+            LDN(&y, read_memory((inst->operand1 + x) & 0xff));
             break;
         case 0xac: // LDY Absolute
             LDN(&y, read_memory(inst->operand2 << 8 | inst->operand1));
@@ -629,10 +629,10 @@ void CPU::execute_instruction(Instruction *inst) {
             a = LSR(a);
             break;
         case 0x46: // LSR Zero Page
-            memory[inst->operand1] = LSR(memory[inst->operand1]);
+            write_memory(inst->operand1, LSR(read_memory(inst->operand1)));
             break;
         case 0x56: // LSR Zero Page,X
-            memory[(inst->operand1 + x) & 0xff] = LSR(memory[(inst->operand1 + x) & 0xff]);
+            write_memory((inst->operand1 + x) & 0xff, LSR(read_memory((inst->operand1 + x) & 0xff)));
             break;
         case 0x4e: // LSR Absolute
             addr = inst->operand2 << 8 | inst->operand1;
@@ -646,10 +646,10 @@ void CPU::execute_instruction(Instruction *inst) {
             ORA(inst->operand1);
             break;
         case 0x05: // ORA Zero Page
-            ORA(memory[inst->operand1]);
+            ORA(read_memory(inst->operand1));
             break;
         case 0x15: // ORA Zero Page,X
-            ORA(memory[(inst->operand1 + x) & 0xff]);
+            ORA(read_memory((inst->operand1 + x) & 0xff));
             break;
         case 0x0d: // ORA Absolute
             ORA(read_memory(inst->operand2 << 8 | inst->operand1));
@@ -693,16 +693,16 @@ void CPU::execute_instruction(Instruction *inst) {
             a = ROR(a);
             break;
         case 0x26: // ROL Zero Page
-            memory[inst->operand1] = ROL(memory[inst->operand1]);
+            write_memory(inst->operand1, ROL(read_memory(inst->operand1)));
             break;
         case 0x66: // ROR Zero Page
-            memory[inst->operand1] = ROR(memory[inst->operand1]);
+            write_memory(inst->operand1, ROR(read_memory(inst->operand1)));
             break;
         case 0x36: // ROL Zero Page,X
-            memory[(inst->operand1 + x) & 0xff] = ROL(memory[(inst->operand1 + x) & 0xff]);
+            write_memory((inst->operand1 + x) & 0xff, ROL(read_memory((inst->operand1 + x) & 0xff)));
             break;
         case 0x76: // ROR Zero Page,X
-            memory[(inst->operand1 + x) & 0xff] = ROR(memory[(inst->operand1 + x) & 0xff]);
+            write_memory((inst->operand1 + x) & 0xff, ROR(read_memory((inst->operand1 + x) & 0xff)));
             break;
         case 0x2e: // ROL Absolute
             addr = inst->operand2 << 8 | inst->operand1;
@@ -737,14 +737,14 @@ void CPU::execute_instruction(Instruction *inst) {
 }    
 
 uint16_t CPU::get_indirect_x_address(uint8_t value) {
-    int8_t low = memory[(value + x) & 0xff];
-    uint8_t high = memory[(value + x + 1) & 0xff];
+    int8_t low = read_memory((value + x) & 0xff);
+    uint8_t high = read_memory((value + x + 1) & 0xff);
     return read_memory(((high << 8) + low) & 0xffff);
 }
 
 uint16_t CPU::get_indirect_y_address(uint8_t value, bool *page_crossed) {
-    uint8_t low = memory[value];
-    uint8_t high = memory[value + 1];
+    uint8_t low = read_memory(value);
+    uint8_t high = read_memory(value + 1);
     *page_crossed = ((low + y) > 0xff);
     return (read_memory(((high << 8) + low) & 0xffff) + y) & 0xffff;
 }
@@ -773,12 +773,12 @@ bool CPU::is_set(FLAG flag) {
 
 // stack operations
 void CPU::push(uint8_t value) {
-    memory[0x100 + s] = value;
+    write_memory(0x100 + s, value);
     s--;
 }
 uint8_t CPU::pull() {
     s++;
-    return memory[0x100 + s];
+    return read_memory(0x100 + s);
 }
 uint8_t CPU::pull_p() {
     uint8_t pval = pull() & ~(B | O);
