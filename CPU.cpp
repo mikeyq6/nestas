@@ -750,11 +750,22 @@ uint16_t CPU::get_indirect_y_address(uint8_t value, bool *page_crossed) {
 }
 
 uint8_t CPU::read_memory(uint16_t addr) {
-    return memory[addr];
+    if(addr >= 0x2000 && addr < 0x4000) {
+        // Mirror of PPU registers
+        return shared_data->get_ppu_register(addr);
+    } else {
+        return memory[addr];
+    }
 }
 
 void CPU::write_memory(uint16_t addr, uint8_t value) {
-    memory[addr] = value;
+    if(addr >= 0x2000 && addr < 0x4000) {
+        // Mirror of PPU registers
+        shared_data->set_ppu_register(addr, value);
+        return;
+    } else {
+        memory[addr] = value;
+    }
 }
 
 void CPU::stop() {
