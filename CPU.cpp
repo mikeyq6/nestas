@@ -68,6 +68,8 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0xe8: // INX Implied
         case 0xc8: // INY Implied
         case 0x4a: // LSR Accumulator
+        case 0x2a: // ROL Accumulator
+        case 0x6a: // ROR Accumulator
             inst->cycles = 2;
             break;
         case 0x69: // ADC Immediate
@@ -167,6 +169,8 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0xb1: // LDA (Indirect),Y
         case 0x46: // LSR Zero Page
         case 0x11: // ORA (Indirect),Y
+        case 0x26: // ROL Zero Page
+        case 0x66: // ROR Zero Page
             inst->operand1 = memory[pc++];
             inst->cycles = 5; // +1 if page crossed
             break;
@@ -185,6 +189,8 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0xa1: // LDA (Indirect,X)
         case 0x56: // LSR (Indirect,X)
         case 0x01: // ORA (Indirect,X)
+        case 0x36: // ROL Zero Page,X
+        case 0x76: // ROR Zero Page,X
             inst->operand1 = memory[pc++];
             inst->cycles = 6;
             break;
@@ -193,6 +199,8 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0xee: // INC Absolute
         case 0x20: // JSR Absolute
         case 0x4e: // LSR Absolute
+        case 0x2e: // ROL Absolute
+        case 0x6e: // ROR Absolute
             inst->operand1 = memory[pc++];
             inst->operand2 = memory[pc++];
             inst->cycles = 6;
@@ -204,6 +212,8 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0xde: // DEC Absolute,X
         case 0xfe: // INC Absolute,X
         case 0x5e: // LSR Absolute,X
+        case 0x3e: // ROL Absolute,X
+        case 0x7e: // ROR Absolute,X
             inst->operand1 = memory[pc++];
             inst->operand2 = memory[pc++];
             inst->cycles = 7;
@@ -669,9 +679,43 @@ void CPU::execute_instruction(Instruction *inst) {
             push(p | B | O); // When pushing P to the stack, the B flag is set to 1
             break;
         case 0x28: // PLP Implied
-            uint8_t pval = pull() & ~(B | O);
-            uint8_t bflags = p & (B | O); 
-            p = pval | bflags;
+            // uint8_t pval = pull() & ~(B | O);
+            // uint8_t bflags = p & (B | O); 
+            p = (pull() & ~(B | O)) | (p & (B | O));
+            break;
+        case 0x2a: // ROL Accumulator
+            a = ROL(a);
+            break;
+        case 0x6a: // ROR Accumulator
+            a = ROR(a);
+            break;
+        case 0x26: // ROL Zero Page
+            memory[inst->operand1] = ROL(memory[inst->operand1]);
+            break;
+        case 0x66: // ROR Zero Page
+            memory[inst->operand1] = ROR(memory[inst->operand1]);
+            break;
+        case 0x36: // ROL Zero Page,X
+            memory[(inst->operand1 + x) & 0xff] = ROL(memory[(inst->operand1 + x) & 0xff]);
+            break;
+        case 0x76: // ROR Zero Page,X
+            memory[(inst->operand1 + x) & 0xff] = ROR(memory[(inst->operand1 + x) & 0xff]);
+            break;
+        case 0x2e: // ROL Absolute
+            addr = inst->operand2 << 8 | inst->operand1;
+            memory[addr] = ROL(memory[addr]);
+            break;
+        case 0x6e: // ROR Absolute
+            addr = inst->operand2 << 8 | inst->operand1;
+            memory[addr] = ROR(memory[addr]);
+            break;
+        case 0x3e: // ROL Absolute,X
+            addr = ((inst->operand2 << 8 | inst->operand1) + x) & 0xffff;
+            memory[addr] = ROL(memory[addr]);
+            break;
+        case 0x7e: // ROR Absolute,X
+            addr = ((inst->operand2 << 8 | inst->operand1) + x) & 0xffff;
+            memory[addr] = ROR(memory[addr]);
             break;
         case 0xea: // NOP Implied
             break;
@@ -776,4 +820,24 @@ void CPU::ORA(uint8_t value) {
     a |= value;
     if(a == 0) set_flag(Z); else reset_flag(Z);
     if(a & 0x80) set_flag(N); else reset_flag(N);
+}
+
+uint8_t CPU::ROL(uint8_t value) {
+    bool old_carry = is_set(C);
+    if(value & 0x80) set_flag(C); else reset_flag(C);
+    value <<= 1;
+    value |= old_carry ? 1 : 0;
+    if(value ==0) set_flag(Z); else reset_flag(Z);
+    if(value & 0x80) set_flag(N); else reset_flag(N);
+    return value;
+}
+
+uint8_t CPU::ROR(uint8_t value) {
+    bool old_carry = is_set(C);
+    if(value & 0x1) set_flag(C); else reset_flag(C);
+    value >>= 1;
+    value |= old_carry ? 0x80 : 0;
+    if(value == 0) set_flag(Z); else reset_flag(Z);
+    if(value & 0x80) set_flag(N); else reset_flag(N);
+    return value;
 }
