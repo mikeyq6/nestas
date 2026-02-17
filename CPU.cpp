@@ -87,6 +87,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0xa9: // LDA Immediate
         case 0xa2: // LDX Immediate
         case 0xa0: // LDY Immediate
+        case 0x09: // ORA Immediate
             inst->operand1 = memory[pc++];
             inst->cycles = 2; // +1 if branch taken, +2 if page crossed
             break;
@@ -100,6 +101,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0xa5: // LDA Zero Page
         case 0xa6: // LDX Zero Page
         case 0xa4: // LDY Zero Page
+        case 0x05: // ORA Zero Page
             inst->operand1 = memory[pc++];
             inst->cycles = 3;
             break;
@@ -115,6 +117,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0xb5: // LDA Zero Page,X
         case 0xb6: // LDX Zero Page,Y
         case 0xb4: // LDY Zero Page,X
+        case 0x15: // ORA Zero Page,X
             inst->operand1 = memory[pc++];
             inst->cycles = 4;
             break;
@@ -139,6 +142,9 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0xbe: // LDX Absolute,Y
         case 0xac: // LDY Absolute
         case 0xbc: // LDY Absolute,X
+        case 0x0d: // ORA Absolute
+        case 0x1d: // ORA Absolute,X
+        case 0x19: // ORA Absolute,Y
             inst->operand1 = memory[pc++];
             inst->operand2 = memory[pc++];
             inst->cycles = 4; // +1 if page crossed
@@ -152,6 +158,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0xe6: // INC Zero Page
         case 0xb1: // LDA (Indirect),Y
         case 0x46: // LSR Zero Page
+        case 0x11: // ORA (Indirect),Y
             inst->operand1 = memory[pc++];
             inst->cycles = 5; // +1 if page crossed
             break;
@@ -169,6 +176,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0xf6: // INC Zero Page,X
         case 0xa1: // LDA (Indirect,X)
         case 0x56: // LSR (Indirect,X)
+        case 0x01: // ORA (Indirect,X)
             inst->operand1 = memory[pc++];
             inst->cycles = 6;
             break;
@@ -612,6 +620,35 @@ void CPU::execute_instruction(Instruction *inst) {
             addr = ((inst->operand2 << 8 | inst->operand1) + x) & 0xffff;
             memory[addr] = LSR(memory[addr]);
             break;
+        case 0x09: // ORA Immediate
+            ORA(inst->operand1);
+            break;
+        case 0x05: // ORA Zero Page
+            ORA(memory[inst->operand1]);
+            break;
+        case 0x15: // ORA Zero Page,X
+            ORA(memory[(inst->operand1 + x) & 0xff]);
+            break;
+        case 0x0d: // ORA Absolute
+            ORA(memory[inst->operand2 << 8 | inst->operand1]);
+            break;
+        case 0x1d: // ORA Absolute,X
+            if(inst->operand1 + x > 0xff) inst->cycles++; // page crossed
+            ORA(memory[((inst->operand2 << 8 | inst->operand1) + x) & 0xffff]);
+            break;
+        case 0x19: // ORA Absolute,Y
+            if(inst->operand1 + y > 0xff) inst->cycles++; // page crossed
+            ORA(memory[((inst->operand2 << 8 | inst->operand1) + y) & 0xffff]);
+            break;
+        case 0x01: // ORA (Indirect,X)
+            addr = get_indirect_x_address(inst->operand1);
+            ORA(memory[addr & 0xffff]);
+            break;
+        case 0x11: // ORA (Indirect),Y
+            addr = get_indirect_y_address(inst->operand1, &page_crossed);
+            if(page_crossed) inst->cycles++; // page crossed
+            ORA(memory[addr & 0xffff]);
+            break;
         case 0xea: // NOP Implied
             break;
         default:
@@ -709,4 +746,10 @@ uint8_t CPU::LSR(uint8_t value) {
     if(value >> 1 == 0) set_flag(Z); else reset_flag(Z);
     reset_flag(N);
     return value >> 1;
+}
+
+void CPU::ORA(uint8_t value) {
+    a |= value;
+    if(a == 0) set_flag(Z); else reset_flag(Z);
+    if(a & 0x80) set_flag(N); else reset_flag(N);
 }

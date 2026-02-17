@@ -71,4 +71,5 @@ private:
     void EOR(uint8_t value);
     void LDN(uint8_t *target, uint8_t value);
     uint8_t LSR(uint8_t value);
+    void ORA(uint8_t value);
 };
