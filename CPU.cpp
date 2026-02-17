@@ -83,6 +83,9 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0xe0: // CPX Immediate
         case 0xc0: // CPY Immediate
         case 0x49: // EOR Immediate
+        case 0xa9: // LDA Immediate
+        case 0xa2: // LDX Immediate
+        case 0xa0: // LDY Immediate
             inst->operand1 = memory[pc++];
             inst->cycles = 2; // +1 if branch taken, +2 if page crossed
             break;
@@ -93,6 +96,9 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0xe4: // CPX Zero Page
         case 0xd4: // CPY Zero Page
         case 0x45: // EOR Zero Page
+        case 0xa5: // LDA Zero Page
+        case 0xa6: // LDX Zero Page
+        case 0xa4: // LDY Zero Page
             inst->operand1 = memory[pc++];
             inst->cycles = 3;
             break;
@@ -105,6 +111,9 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x35: // AND Zero Page,X
         case 0xd5: // CMP Zero Page,X
         case 0x55: // EOR Zero Page,X
+        case 0xb5: // LDA Zero Page,X
+        case 0xb6: // LDX Zero Page,Y
+        case 0xb4: // LDY Zero Page,X
             inst->operand1 = memory[pc++];
             inst->cycles = 4;
             break;
@@ -122,6 +131,13 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x4d: // EOR Absolute
         case 0x5d: // EOR Absolute,X
         case 0x59: // EOR Absolute,Y
+        case 0xad: // LDA Absolute
+        case 0xbd: // LDA Absolute,X
+        case 0xb9: // LDA Absolute,Y
+        case 0xae: // LDX Absolute
+        case 0xbe: // LDX Absolute,Y
+        case 0xac: // LDY Absolute
+        case 0xbc: // LDY Absolute,X
             inst->operand1 = memory[pc++];
             inst->operand2 = memory[pc++];
             inst->cycles = 4; // +1 if page crossed
@@ -133,6 +149,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0xc6: // DEC Zero Page
         case 0x51: // EOR (Indirect),Y
         case 0xe6: // INC Zero Page
+        case 0xb1: // LDA (Indirect),Y
             inst->operand1 = memory[pc++];
             inst->cycles = 5; // +1 if page crossed
             break;
@@ -148,6 +165,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0xd6: // DEC Zero Page,X
         case 0x41: // EOR (Indirect,X)
         case 0xf6: // INC Zero Page,X
+        case 0xa1: // LDA (Indirect,X)
             inst->operand1 = memory[pc++];
             inst->cycles = 6;
             break;
@@ -504,11 +522,73 @@ void CPU::execute_instruction(Instruction *inst) {
             break;
         case 0x6c: // JMP Indirect
             pc = memory[(inst->operand2 << 8) | inst->operand1];
+            // TODO: Implement bug page crossing behavior for JMP Indirect, see https://www.nesdev.org/wiki/Instruction_reference#JMP
             break;
         case 0x20: // JSR Absolute
             push((pc >> 8) & 0xff); // push high byte of PC
             push(pc & 0xff);        // push low byte of PC
             pc = memory[(inst->operand2 << 8) | inst->operand1];
+            break;
+        case 0xa9: // LDA Immediate
+            LDN(&a, inst->operand1);
+            break;
+        case 0xa5: // LDA Zero Page
+            LDN(&a, memory[inst->operand1]);
+            break;
+        case 0xb5: // LDA Zero Page,X
+            LDN(&a, memory[(inst->operand1 + x) & 0xff]);
+            break;
+        case 0xad: // LDA Absolute
+            LDN(&a, memory[inst->operand2 << 8 | inst->operand1]);
+            break;
+        case 0xbd: // LDA Absolute,X
+            if(inst->operand1 + x > 0xff) inst->cycles++; // page crossed
+            LDN(&a, memory[((inst->operand2 << 8 | inst->operand1) + x) & 0xffff]);
+            break;
+        case 0xb9: // LDA Absolute,Y
+            if(inst->operand1 + y > 0xff) inst->cycles++; // page crossed
+            LDN(&a, memory[((inst->operand2 << 8 | inst->operand1) + y) & 0xffff]);
+            break;
+        case 0xa1: // LDA (Indirect,X)
+            addr = get_indirect_x_address(inst->operand1);
+            LDN(&a, memory[addr & 0xffff]);
+            break;
+        case 0xb1: // LDA (Indirect),Y
+            addr = get_indirect_y_address(inst->operand1, &page_crossed);
+            if(page_crossed) inst->cycles++; // page crossed
+            LDN(&a, memory[addr & 0xffff]);
+            break;
+        case 0xa2: // LDX Immediate
+            LDN(&x, inst->operand1);
+            break;
+        case 0xa6: // LDX Zero Page
+            LDN(&x, memory[inst->operand1]);
+            break;
+        case 0xb6: // LDX Zero Page,Y
+            LDN(&x, memory[(inst->operand1 + y) & 0xff]);
+            break;
+        case 0xae: // LDX Absolute
+            LDN(&x, memory[inst->operand2 << 8 | inst->operand1]);
+            break;
+        case 0xbe: // LDX Absolute,Y
+            if(inst->operand1 + y > 0xff) inst->cycles++; // page crossed
+            LDN(&x, memory[((inst->operand2 << 8 | inst->operand1) + y) & 0xffff]);
+            break;
+        case 0xa0: // LDY Immediate
+            LDN(&y, inst->operand1);
+            break;
+        case 0xa4: // LDY Zero Page
+            LDN(&y, memory[inst->operand1]);
+            break;
+        case 0xb4: // LDY Zero Page,X
+            LDN(&y, memory[(inst->operand1 + x) & 0xff]);
+            break;
+        case 0xac: // LDY Absolute
+            LDN(&y, memory[inst->operand2 << 8 | inst->operand1]);
+            break;
+        case 0xbc: // LDY Absolute,X
+            if(inst->operand1 + x > 0xff) inst->cycles++; // page crossed
+            LDN(&y, memory[((inst->operand2 << 8 | inst->operand1) + x) & 0xffff]);
             break;
         case 0xea: // NOP Implied
             break;
@@ -589,8 +669,15 @@ void CPU::CMP(uint8_t val1, uint8_t val2) {
     if(val1 == val2) set_flag(Z); else reset_flag(Z);
     if((val1 - val2) & 0x80) set_flag(N); else reset_flag(N);
 }
+
 void CPU::EOR(uint8_t value) {
     a = a ^ value;
     if(a == 0) set_flag(Z); else reset_flag(Z);
     if(a & 0x80) set_flag(N); else reset_flag(N);
+}
+
+void CPU::LDN(uint8_t *target, uint8_t value) {
+    *target = value;
+    if(*target == 0) set_flag(Z); else reset_flag(Z);
+    if(*target & 0x80) set_flag(N); else reset_flag(N);
 }
