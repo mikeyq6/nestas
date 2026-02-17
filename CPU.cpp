@@ -49,7 +49,7 @@ void CPU::run() {
 }
 
 void CPU::get_next_instruction(uint8_t *inst) {
-    *inst = memory[pc++];
+    *inst = read_memory(pc++);
 }
 
 void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
@@ -90,7 +90,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0xa2: // LDX Immediate
         case 0xa0: // LDY Immediate
         case 0x09: // ORA Immediate
-            inst->operand1 = memory[pc++];
+            inst->operand1 = read_memory(pc++);
             inst->cycles = 2; // +1 if branch taken, +2 if page crossed
             break;
         case 0x48: // PHA Implied
@@ -108,12 +108,12 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0xa6: // LDX Zero Page
         case 0xa4: // LDY Zero Page
         case 0x05: // ORA Zero Page
-            inst->operand1 = memory[pc++];
+            inst->operand1 = read_memory(pc++);
             inst->cycles = 3;
             break;
         case 0x4c: // JMP Absolute
-            inst->operand1 = memory[pc++];
-            inst->operand2 = memory[pc++];
+            inst->operand1 = read_memory(pc++);
+            inst->operand2 = read_memory(pc++);
             inst->cycles = 3;
             break;
         case 0x68: // PLA Implied
@@ -128,7 +128,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0xb6: // LDX Zero Page,Y
         case 0xb4: // LDY Zero Page,X
         case 0x15: // ORA Zero Page,X
-            inst->operand1 = memory[pc++];
+            inst->operand1 = read_memory(pc++);
             inst->cycles = 4;
             break;
         case 0x6d: // ADC Absolute
@@ -155,8 +155,8 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x0d: // ORA Absolute
         case 0x1d: // ORA Absolute,X
         case 0x19: // ORA Absolute,Y
-            inst->operand1 = memory[pc++];
-            inst->operand2 = memory[pc++];
+            inst->operand1 = read_memory(pc++);
+            inst->operand2 = read_memory(pc++);
             inst->cycles = 4; // +1 if page crossed
             break;
         case 0x71: // ADC (Indirect),Y
@@ -171,12 +171,12 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x11: // ORA (Indirect),Y
         case 0x26: // ROL Zero Page
         case 0x66: // ROR Zero Page
-            inst->operand1 = memory[pc++];
+            inst->operand1 = read_memory(pc++);
             inst->cycles = 5; // +1 if page crossed
             break;
         case 0x6c: // JMP Indirect
-            inst->operand1 = memory[pc++];
-            inst->operand2 = memory[pc++];
+            inst->operand1 = read_memory(pc++);
+            inst->operand2 = read_memory(pc++);
             inst->cycles = 5; // +1 if page crossed
             break;
         case 0x40: // RTI Implied
@@ -195,7 +195,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x01: // ORA (Indirect,X)
         case 0x36: // ROL Zero Page,X
         case 0x76: // ROR Zero Page,X
-            inst->operand1 = memory[pc++];
+            inst->operand1 = read_memory(pc++);
             inst->cycles = 6;
             break;
         case 0x0e: // ASL Absolute
@@ -205,8 +205,8 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x4e: // LSR Absolute
         case 0x2e: // ROL Absolute
         case 0x6e: // ROR Absolute
-            inst->operand1 = memory[pc++];
-            inst->operand2 = memory[pc++];
+            inst->operand1 = read_memory(pc++);
+            inst->operand2 = read_memory(pc++);
             inst->cycles = 6;
             break;
         case 0x00: // BRK
@@ -218,8 +218,8 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x5e: // LSR Absolute,X
         case 0x3e: // ROL Absolute,X
         case 0x7e: // ROR Absolute,X
-            inst->operand1 = memory[pc++];
-            inst->operand2 = memory[pc++];
+            inst->operand1 = read_memory(pc++);
+            inst->operand2 = read_memory(pc++);
             inst->cycles = 7;
             break;
         default:
@@ -250,24 +250,24 @@ void CPU::execute_instruction(Instruction *inst) {
             ADC(memory[(inst->operand1 + x) & 0xff]);
             break;
         case 0x6d: // ADC Absolute
-            ADC(memory[inst->operand2 << 8 | inst->operand1]);
+            ADC(read_memory(inst->operand2 << 8 | inst->operand1));
             break;
         case 0x7d: // ADC Absolute,X
             if(inst->operand1 + x > 0xff) inst->cycles++; // page crossed
-            ADC(memory[((inst->operand2 << 8 | inst->operand1) + x) & 0xffff]);
+            ADC(read_memory(((inst->operand2 << 8 | inst->operand1) + x) & 0xffff));
             break;
         case 0x79: // ADC Absolute,Y
             if(inst->operand1 + y > 0xff) inst->cycles++; // page crossed
-            ADC(memory[((inst->operand2 << 8 | inst->operand1) + y) & 0xffff]);
+            ADC(read_memory(((inst->operand2 << 8 | inst->operand1) + y) & 0xffff));
             break;
         case 0x61: // ADC (Indirect,X)
             addr = get_indirect_x_address(inst->operand1);
-            ADC(memory[addr & 0xffff]);
+            ADC(read_memory(addr & 0xffff));
             break;
         case 0x71: // ADC (Indirect,Y)
             addr = get_indirect_y_address(inst->operand1, &page_crossed);
             if(page_crossed) inst->cycles++; // page crossed
-            ADC(memory[addr & 0xffff]);
+            ADC(read_memory(addr & 0xffff));
             break;
         case 0x29: // AND Immediate
             AND(inst->operand1);
@@ -279,24 +279,24 @@ void CPU::execute_instruction(Instruction *inst) {
             AND(memory[(inst->operand1 + x) & 0xff]);
             break;
         case 0x2d: // AND Absolute
-            AND(memory[inst->operand2 << 8 | inst->operand1]);
+            AND(read_memory(inst->operand2 << 8 | inst->operand1));
             break;
         case 0x3d: // AND Absolute,X
             if(inst->operand1 + x > 0xff) inst->cycles++; // page crossed
-            AND(memory[((inst->operand2 << 8 | inst->operand1) + x) & 0xffff]);
+            AND(read_memory(((inst->operand2 << 8 | inst->operand1) + x) & 0xffff));
             break;
         case 0x39: // AND Absolute,Y
             if(inst->operand1 + y > 0xff) inst->cycles++; // page crossed
-            AND(memory[((inst->operand2 << 8 | inst->operand1) + y) & 0xffff]);
+            AND(read_memory(((inst->operand2 << 8 | inst->operand1) + y) & 0xffff));
             break;
         case 0x21: // AND (Indirect,X)
             addr = get_indirect_x_address(inst->operand1);
-            AND(memory[addr & 0xffff]);
+            AND(read_memory(addr & 0xffff));
             break;
         case 0x31: // AND (Indirect),Y
             addr = get_indirect_y_address(inst->operand1, &page_crossed);
             if(page_crossed) inst->cycles++; // page crossed
-            AND(memory[addr & 0xffff]);
+            AND(read_memory(addr & 0xffff));
             break;
         case 0x0a: // ASL Accumulator
             a = ASL(a);
@@ -309,11 +309,11 @@ void CPU::execute_instruction(Instruction *inst) {
             break;
         case 0x0e: // ASL Absolute
             addr = inst->operand2 << 8 | inst->operand1;
-            memory[addr] = ASL(memory[addr]);
+            write_memory(addr, ASL(read_memory(addr)));
             break;
         case 0x1e: // ASL Absolute,X
             addr = ((inst->operand2 << 8 | inst->operand1) + x) & 0xffff;
-            memory[addr] = ASL(memory[addr]);
+            write_memory(addr, ASL(read_memory(addr)));
             break;
         case 0x90: // BCC Relative
             if(!is_set(C)) {
@@ -391,7 +391,7 @@ void CPU::execute_instruction(Instruction *inst) {
             BIT(memory[inst->operand1]);
             break;
         case 0x2c: // BIT Absolute
-            BIT(memory[inst->operand2 << 8 | inst->operand1]);
+            BIT(read_memory(inst->operand2 << 8 | inst->operand1));
             break;
         case 0x18: // CLC Implied
             reset_flag(C);
@@ -433,29 +433,29 @@ void CPU::execute_instruction(Instruction *inst) {
             CMP(a, memory[(inst->operand1 + x) & 0xff]);
             break;
         case 0xcd: // CMP Absolute
-            CMP(a, memory[inst->operand2 << 8 | inst->operand1]);
+            CMP(a, read_memory(inst->operand2 << 8 | inst->operand1));
             break;
         case 0xec: // CPX Absolute
-            CMP(x, memory[inst->operand2 << 8 | inst->operand1]);
+            CMP(x, read_memory(inst->operand2 << 8 | inst->operand1));
             break;
         case 0xcc: // CPY Absolute
-            CMP(y, memory[inst->operand2 << 8 | inst->operand1]);
+            CMP(y, read_memory(inst->operand2 << 8 | inst->operand1));
             break;
         case 0xdd: // CMP Absolute,X
             if(inst->operand1 + x > 0xff) inst->cycles++; // page crossed
-            CMP(a, memory[((inst->operand2 << 8 | inst->operand1) + x) & 0xffff]);
+            CMP(a, read_memory(((inst->operand2 << 8 | inst->operand1) + x) & 0xffff));
             break;
         case 0xd9: // CMP Absolute,Y
             if(inst->operand1 + y > 0xff) inst->cycles++; // page crossed
-            CMP(a, memory[((inst->operand2 << 8 | inst->operand1) + y) & 0xffff]);
+            CMP(a, read_memory(((inst->operand2 << 8 | inst->operand1) + y) & 0xffff));
             break;
         case 0xc1: // CMP (Indirect,X)
             addr = get_indirect_x_address(inst->operand1);
-            CMP(a, memory[addr & 0xffff]);
+            CMP(a, read_memory(addr & 0xffff));
         case 0xd1: // CMP (Indirect),Y
             addr = get_indirect_y_address(inst->operand1, &page_crossed);
             if(page_crossed) inst->cycles++; // page crossed
-            CMP(a, memory[addr & 0xffff]);
+            CMP(a, read_memory(addr & 0xffff));
             break;
         case 0xc6: // DEC Zero Page
             memory[inst->operand1]--;
@@ -464,21 +464,21 @@ void CPU::execute_instruction(Instruction *inst) {
             break;
         case 0xd6: // DEC Zero Page,X
             addr = (inst->operand1 + x) & 0xff;
-            memory[addr]--;
-            if(memory[addr] == 0) set_flag(Z); else reset_flag(Z);
-            if(memory[addr] & 0x80) set_flag(N); else reset_flag(N);
+            write_memory(addr, read_memory(addr) - 1);
+            if(read_memory(addr) == 0) set_flag(Z); else reset_flag(Z);
+            if(read_memory(addr) & 0x80) set_flag(N); else reset_flag(N);
             break;
         case 0xce: // DEC Absolute
             addr = inst->operand2 << 8 | inst->operand1;
-            memory[addr]--;
-            if(memory[addr] == 0) set_flag(Z); else reset_flag(Z);
-            if(memory[addr] & 0x80) set_flag(N); else reset_flag(N);
+            write_memory(addr, read_memory(addr) - 1);
+            if(read_memory(addr) == 0) set_flag(Z); else reset_flag(Z);
+            if(read_memory(addr) & 0x80) set_flag(N); else reset_flag(N);
             break;
         case 0xde: // DEC Absolute,X
             addr = ((inst->operand2 << 8 | inst->operand1) + x) & 0xffff;
-            memory[addr]--;
-            if(memory[addr] == 0) set_flag(Z); else reset_flag(Z);
-            if(memory[addr] & 0x80) set_flag(N); else reset_flag(N);
+            write_memory(addr, read_memory(addr) - 1);
+            if(read_memory(addr) == 0) set_flag(Z); else reset_flag(Z);
+            if(read_memory(addr) & 0x80) set_flag(N); else reset_flag(N);
             break;
         case 0xca: // DEX Implied
             x--;
@@ -500,24 +500,24 @@ void CPU::execute_instruction(Instruction *inst) {
             EOR(memory[(inst->operand1 + x) & 0xff]);
             break;
         case 0x4d: // EOR Absolute
-            EOR(memory[inst->operand2 << 8 | inst->operand1]);
+            EOR(read_memory(inst->operand2 << 8 | inst->operand1));
             break;
         case 0x5d: // EOR Absolute,X
             if(inst->operand1 + x > 0xff) inst->cycles++; // page crossed
-            EOR(memory[((inst->operand2 << 8 | inst->operand1) + x) & 0xffff]);
+            EOR(read_memory(((inst->operand2 << 8 | inst->operand1) + x) & 0xffff));
             break;
         case 0x59: // EOR Absolute,Y
             if(inst->operand1 + y > 0xff) inst->cycles++; // page crossed
-            EOR(memory[((inst->operand2 << 8 | inst->operand1) + y) & 0xffff]);
+            EOR(read_memory(((inst->operand2 << 8 | inst->operand1) + y) & 0xffff));
             break;
         case 0x41: // EOR (Indirect,X)
             addr = get_indirect_x_address(inst->operand1);
-            EOR(memory[addr & 0xffff]);
+            EOR(read_memory(addr & 0xffff));
             break;
         case 0x51: // EOR (Indirect),Y
             addr = get_indirect_y_address(inst->operand1, &page_crossed);
             if(page_crossed) inst->cycles++; // page crossed
-            EOR(memory[addr & 0xffff]);
+            EOR(read_memory(addr & 0xffff));
             break;
         case 0xe6: // INC Zero Page
             memory[inst->operand1]++;
@@ -532,15 +532,15 @@ void CPU::execute_instruction(Instruction *inst) {
             break;
         case 0xee: // INC Absolute
             addr = inst->operand2 << 8 | inst->operand1;
-            memory[addr]++;
-            if(memory[addr] == 0) set_flag(Z); else reset_flag(Z);
-            if(memory[addr] & 0x80) set_flag(N); else reset_flag(N);
+            write_memory(addr, read_memory(addr) + 1);
+            if(read_memory(addr) == 0) set_flag(Z); else reset_flag(Z);
+            if(read_memory(addr) & 0x80) set_flag(N); else reset_flag(N);
             break;
         case 0xfe: // INC Absolute,X
             addr = ((inst->operand2 << 8 | inst->operand1) + x) & 0xffff;
-            memory[addr]++;
-            if(memory[addr] == 0) set_flag(Z); else reset_flag(Z);
-            if(memory[addr] & 0x80) set_flag(N); else reset_flag(N);
+            write_memory(addr, read_memory(addr) + 1);
+            if(read_memory(addr) == 0) set_flag(Z); else reset_flag(Z);
+            if(read_memory(addr) & 0x80) set_flag(N); else reset_flag(N);
             break;
         case 0xe8: // INX Implied
             x++;
@@ -556,13 +556,13 @@ void CPU::execute_instruction(Instruction *inst) {
             pc = (inst->operand2 << 8) | inst->operand1;
             break;
         case 0x6c: // JMP Indirect
-            pc = memory[(inst->operand2 << 8) | inst->operand1];
+            pc = read_memory((inst->operand2 << 8) | inst->operand1);
             // TODO: Implement bug page crossing behavior for JMP Indirect, see https://www.nesdev.org/wiki/Instruction_reference#JMP
             break;
         case 0x20: // JSR Absolute
             push((pc >> 8) & 0xff); // push high byte of PC
             push(pc & 0xff);        // push low byte of PC
-            pc = memory[(inst->operand2 << 8) | inst->operand1];
+            pc = read_memory((inst->operand2 << 8) | inst->operand1);
             break;
         case 0xa9: // LDA Immediate
             LDN(&a, inst->operand1);
@@ -574,24 +574,24 @@ void CPU::execute_instruction(Instruction *inst) {
             LDN(&a, memory[(inst->operand1 + x) & 0xff]);
             break;
         case 0xad: // LDA Absolute
-            LDN(&a, memory[inst->operand2 << 8 | inst->operand1]);
+            LDN(&a, read_memory(inst->operand2 << 8 | inst->operand1));
             break;
         case 0xbd: // LDA Absolute,X
             if(inst->operand1 + x > 0xff) inst->cycles++; // page crossed
-            LDN(&a, memory[((inst->operand2 << 8 | inst->operand1) + x) & 0xffff]);
+            LDN(&a, read_memory(((inst->operand2 << 8 | inst->operand1) + x) & 0xffff));
             break;
         case 0xb9: // LDA Absolute,Y
             if(inst->operand1 + y > 0xff) inst->cycles++; // page crossed
-            LDN(&a, memory[((inst->operand2 << 8 | inst->operand1) + y) & 0xffff]);
+            LDN(&a, read_memory(((inst->operand2 << 8 | inst->operand1) + y) & 0xffff));
             break;
         case 0xa1: // LDA (Indirect,X)
             addr = get_indirect_x_address(inst->operand1);
-            LDN(&a, memory[addr & 0xffff]);
+            LDN(&a, read_memory(addr & 0xffff));
             break;
         case 0xb1: // LDA (Indirect),Y
             addr = get_indirect_y_address(inst->operand1, &page_crossed);
             if(page_crossed) inst->cycles++; // page crossed
-            LDN(&a, memory[addr & 0xffff]);
+            LDN(&a, read_memory(addr & 0xffff));
             break;
         case 0xa2: // LDX Immediate
             LDN(&x, inst->operand1);
@@ -603,11 +603,11 @@ void CPU::execute_instruction(Instruction *inst) {
             LDN(&x, memory[(inst->operand1 + y) & 0xff]);
             break;
         case 0xae: // LDX Absolute
-            LDN(&x, memory[inst->operand2 << 8 | inst->operand1]);
+            LDN(&x, read_memory(inst->operand2 << 8 | inst->operand1));
             break;
         case 0xbe: // LDX Absolute,Y
             if(inst->operand1 + y > 0xff) inst->cycles++; // page crossed
-            LDN(&x, memory[((inst->operand2 << 8 | inst->operand1) + y) & 0xffff]);
+            LDN(&x, read_memory(((inst->operand2 << 8 | inst->operand1) + y) & 0xffff));
             break;
         case 0xa0: // LDY Immediate
             LDN(&y, inst->operand1);
@@ -619,11 +619,11 @@ void CPU::execute_instruction(Instruction *inst) {
             LDN(&y, memory[(inst->operand1 + x) & 0xff]);
             break;
         case 0xac: // LDY Absolute
-            LDN(&y, memory[inst->operand2 << 8 | inst->operand1]);
+            LDN(&y, read_memory(inst->operand2 << 8 | inst->operand1));
             break;
         case 0xbc: // LDY Absolute,X
             if(inst->operand1 + x > 0xff) inst->cycles++; // page crossed
-            LDN(&y, memory[((inst->operand2 << 8 | inst->operand1) + x) & 0xffff]);
+            LDN(&y, read_memory(((inst->operand2 << 8 | inst->operand1) + x) & 0xffff));
             break;
         case 0x4a: // LSR Accumulator
             a = LSR(a);
@@ -636,11 +636,11 @@ void CPU::execute_instruction(Instruction *inst) {
             break;
         case 0x4e: // LSR Absolute
             addr = inst->operand2 << 8 | inst->operand1;
-            memory[addr] = LSR(memory[addr]);
+            write_memory(addr, LSR(read_memory(addr)));
             break;
         case 0x5e: // LSR Absolute,X
             addr = ((inst->operand2 << 8 | inst->operand1) + x) & 0xffff;
-            memory[addr] = LSR(memory[addr]);
+            write_memory(addr, LSR(read_memory(addr)));
             break;
         case 0x09: // ORA Immediate
             ORA(inst->operand1);
@@ -652,24 +652,24 @@ void CPU::execute_instruction(Instruction *inst) {
             ORA(memory[(inst->operand1 + x) & 0xff]);
             break;
         case 0x0d: // ORA Absolute
-            ORA(memory[inst->operand2 << 8 | inst->operand1]);
+            ORA(read_memory(inst->operand2 << 8 | inst->operand1));
             break;
         case 0x1d: // ORA Absolute,X
             if(inst->operand1 + x > 0xff) inst->cycles++; // page crossed
-            ORA(memory[((inst->operand2 << 8 | inst->operand1) + x) & 0xffff]);
+            ORA(read_memory(((inst->operand2 << 8 | inst->operand1) + x) & 0xffff));
             break;
         case 0x19: // ORA Absolute,Y
             if(inst->operand1 + y > 0xff) inst->cycles++; // page crossed
-            ORA(memory[((inst->operand2 << 8 | inst->operand1) + y) & 0xffff]);
+            ORA(read_memory(((inst->operand2 << 8 | inst->operand1) + y) & 0xffff));
             break;
         case 0x01: // ORA (Indirect,X)
             addr = get_indirect_x_address(inst->operand1);
-            ORA(memory[addr & 0xffff]);
+            ORA(read_memory(addr & 0xffff));
             break;
         case 0x11: // ORA (Indirect),Y
             addr = get_indirect_y_address(inst->operand1, &page_crossed);
             if(page_crossed) inst->cycles++; // page crossed
-            ORA(memory[addr & 0xffff]);
+            ORA(read_memory(addr & 0xffff));
             break;
         case 0x48: // PHA Implied
             push(a);
@@ -706,19 +706,19 @@ void CPU::execute_instruction(Instruction *inst) {
             break;
         case 0x2e: // ROL Absolute
             addr = inst->operand2 << 8 | inst->operand1;
-            memory[addr] = ROL(memory[addr]);
+            write_memory(addr, ROL(read_memory(addr)));
             break;
         case 0x6e: // ROR Absolute
             addr = inst->operand2 << 8 | inst->operand1;
-            memory[addr] = ROR(memory[addr]);
+            write_memory(addr, ROR(read_memory(addr)));
             break;
         case 0x3e: // ROL Absolute,X
             addr = ((inst->operand2 << 8 | inst->operand1) + x) & 0xffff;
-            memory[addr] = ROL(memory[addr]);
+            write_memory(addr, ROL(read_memory(addr)));
             break;
         case 0x7e: // ROR Absolute,X
             addr = ((inst->operand2 << 8 | inst->operand1) + x) & 0xffff;
-            memory[addr] = ROR(memory[addr]);
+            write_memory(addr, ROR(read_memory(addr)));
             break;
         case 0x40: // RTI Implied
             p = pull_p();
@@ -739,13 +739,22 @@ void CPU::execute_instruction(Instruction *inst) {
 uint16_t CPU::get_indirect_x_address(uint8_t value) {
     int8_t low = memory[(value + x) & 0xff];
     uint8_t high = memory[(value + x + 1) & 0xff];
-    return memory[((high << 8) + low) & 0xffff];
+    return read_memory(((high << 8) + low) & 0xffff);
 }
+
 uint16_t CPU::get_indirect_y_address(uint8_t value, bool *page_crossed) {
     uint8_t low = memory[value];
     uint8_t high = memory[value + 1];
     *page_crossed = ((low + y) > 0xff);
-    return (memory[((high << 8) + low) & 0xffff] + y) & 0xffff;
+    return (read_memory(((high << 8) + low) & 0xffff) + y) & 0xffff;
+}
+
+uint8_t CPU::read_memory(uint16_t addr) {
+    return memory[addr];
+}
+
+void CPU::write_memory(uint16_t addr, uint8_t value) {
+    memory[addr] = value;
 }
 
 void CPU::stop() {

@@ -59,6 +59,9 @@ private:
     uint16_t get_indirect_x_address(uint8_t value);
     uint16_t get_indirect_y_address(uint8_t value, bool *page_crossed);
 
+    uint8_t read_memory(uint16_t addr);
+    void write_memory(uint16_t addr, uint8_t value);
+
     // stack operations
     void push(uint8_t value);
     uint8_t pull();
