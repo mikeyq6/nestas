@@ -62,6 +62,7 @@ private:
     // stack operations
     void push(uint8_t value);
     uint8_t pull();
+    uint8_t pull_p();
 
     // Instruction execution
     void ADC(uint8_t value);

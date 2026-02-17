@@ -179,6 +179,10 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
             inst->operand2 = memory[pc++];
             inst->cycles = 5; // +1 if page crossed
             break;
+        case 0x40: // RTI Implied
+        case 0x60: // RTS Implied
+            inst->cycles = 6;
+            break;
         case 0x61: // ADC (Indirect,X)
         case 0x21: // AND (Indirect,X)
         case 0x16: // ASL (Indirect,X)
@@ -679,9 +683,8 @@ void CPU::execute_instruction(Instruction *inst) {
             push(p | B | O); // When pushing P to the stack, the B flag is set to 1
             break;
         case 0x28: // PLP Implied
-            // uint8_t pval = pull() & ~(B | O);
-            // uint8_t bflags = p & (B | O); 
-            p = (pull() & ~(B | O)) | (p & (B | O));
+            p = pull_p();
+            // TODO: implement delay interrupt behavior for PLP, see https://www.nesdev.org/wiki/Interrupts#RTI and https://www.nesdev.org/wiki/Instruction_reference#PLP
             break;
         case 0x2a: // ROL Accumulator
             a = ROL(a);
@@ -716,6 +719,14 @@ void CPU::execute_instruction(Instruction *inst) {
         case 0x7e: // ROR Absolute,X
             addr = ((inst->operand2 << 8 | inst->operand1) + x) & 0xffff;
             memory[addr] = ROR(memory[addr]);
+            break;
+        case 0x40: // RTI Implied
+            p = pull_p();
+            pc = pull() | (pull() << 8);
+            break;
+            // TODO: implement non-delay interrupt behavior for RTI, see https://www.nesdev.org/wiki/Interrupts#RTI and https://www.nesdev.org/wiki/Instruction_reference#RTI
+        case 0x60: // RTS Implied
+            pc = (pull() | (pull() << 8)) + 1;
             break;
         case 0xea: // NOP Implied
             break;
@@ -759,6 +770,11 @@ void CPU::push(uint8_t value) {
 uint8_t CPU::pull() {
     s++;
     return memory[0x100 + s];
+}
+uint8_t CPU::pull_p() {
+    uint8_t pval = pull() & ~(B | O);
+    uint8_t bflags = p & (B | O); 
+    return pval | bflags;
 }
 
 void CPU::ADC(uint8_t value) {
