@@ -750,21 +750,24 @@ uint16_t CPU::get_indirect_y_address(uint8_t value, bool *page_crossed) {
 }
 
 uint8_t CPU::read_memory(uint16_t addr) {
-    if(addr >= 0x2000 && addr < 0x4000) {
+    if(addr < 0x2000) {
+        return memory[addr & 0x7ff]; // Mirror of internal RAM every 2KB
+    } else if(addr >= 0x2000 && addr < 0x4000) {
         // Mirror of PPU registers
         return shared_data->get_ppu_register(addr);
     } else {
-        return memory[addr];
+        return 0; // Open bus behavior for addresses that are not handled
     }
 }
 
 void CPU::write_memory(uint16_t addr, uint8_t value) {
-    if(addr >= 0x2000 && addr < 0x4000) {
+    if(addr < 0x2000) {
+        memory[addr & 0x7ff] = value; // Mirror of internal RAM every 2KB
+    } else if(addr >= 0x2000 && addr < 0x4000) {
         // Mirror of PPU registers
         shared_data->set_ppu_register(addr, value);
-        return;
     } else {
-        memory[addr] = value;
+        // No operation
     }
 }
 
