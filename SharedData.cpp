@@ -26,3 +26,14 @@ uint16_t SharedData::get_random(uint16_t max) {
     std::uniform_int_distribution<u32> distribute(0, max);
     return distribute(generator);
 }
+
+uint8_t SharedData::get_ppu_register(uint16_t addr) {
+    const lock_guard<mutex> lock{ppu_register_mutex};
+
+    return ppu_registers[addr & 0x7];
+}
+void SharedData::set_ppu_register(uint16_t addr, uint8_t value) {
+    const lock_guard<mutex> lock{ppu_register_mutex};
+
+    ppu_registers[addr & 0x7] = value;
+}

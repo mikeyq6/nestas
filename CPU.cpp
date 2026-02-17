@@ -10,7 +10,7 @@ CPU::CPU(SharedData *shared_data) {
 
     this->shared_data = shared_data;
 
-    ppu = new PPU();
+    ppu = new PPU(shared_data);
 }
 CPU::~CPU() {
     delete ppu;

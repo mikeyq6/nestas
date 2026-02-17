@@ -1,19 +1,14 @@
 #include "inc/PPU.h"
 
-PPU::PPU() {
-
+PPU::PPU(SharedData *shared_data) {
+    this->shared_data = shared_data;
 }
 PPU::~PPU() {
 
 }
 
 void PPU::init() {
-    ppuctrl = 0;
-    ppumask = 0;
-    ppustatus = 0;
-    oamaddr = 0;
-    oamdata = 0;
-    ppuscroll = 0;
-    ppuaddr = 0;
-    ppudata = 0;
+    for(int i=0; i<0x8; i++) {
+        shared_data->set_ppu_register(i, 0);
+    }
 }

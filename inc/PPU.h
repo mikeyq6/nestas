@@ -3,25 +3,26 @@
 #include <cstdint>
 
 #include "Constants.h"
+#include "SharedData.h"
 
 class PPU {
 public:
-    PPU();
+    PPU(SharedData *shared_data);
     ~PPU();
 
     void init();
 
 private:
     enum PPURegister {
-        PPUCTRL = 0x2000,
-        PPUMASK = 0x2001,
-        PPUSTATUS = 0x2002,
-        OAMADDR = 0x2003,
-        OAMDATA = 0x2004,
-        PPUSCROLL = 0x2005,
-        PPUADDR = 0x2006,
-        PPUDATA = 0x2007
+        PPUCTRL = 0x0,
+        PPUMASK = 0x1,
+        PPUSTATUS = 0x2,
+        OAMADDR = 0x3,
+        OAMDATA = 0x4,
+        PPUSCROLL = 0x5,
+        PPUADDR = 0x6,
+        PPUDATA = 0x7
     };
 
-    uint8_t ppuctrl, ppumask, ppustatus, oamaddr, oamdata, ppuscroll, ppuaddr, ppudata;
+    SharedData *shared_data;
 };
