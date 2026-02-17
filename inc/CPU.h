@@ -70,4 +70,5 @@ private:
     void CMP(uint8_t val1, uint8_t val2);
     void EOR(uint8_t value);
     void LDN(uint8_t *target, uint8_t value);
+    uint8_t LSR(uint8_t value);
 };

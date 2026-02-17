@@ -67,6 +67,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x88: // DEY Implied
         case 0xe8: // INX Implied
         case 0xc8: // INY Implied
+        case 0x4a: // LSR Accumulator
             inst->cycles = 2;
             break;
         case 0x69: // ADC Immediate
@@ -150,6 +151,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x51: // EOR (Indirect),Y
         case 0xe6: // INC Zero Page
         case 0xb1: // LDA (Indirect),Y
+        case 0x46: // LSR Zero Page
             inst->operand1 = memory[pc++];
             inst->cycles = 5; // +1 if page crossed
             break;
@@ -166,6 +168,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x41: // EOR (Indirect,X)
         case 0xf6: // INC Zero Page,X
         case 0xa1: // LDA (Indirect,X)
+        case 0x56: // LSR (Indirect,X)
             inst->operand1 = memory[pc++];
             inst->cycles = 6;
             break;
@@ -173,6 +176,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0xce: // DEC Absolute
         case 0xee: // INC Absolute
         case 0x20: // JSR Absolute
+        case 0x4e: // LSR Absolute
             inst->operand1 = memory[pc++];
             inst->operand2 = memory[pc++];
             inst->cycles = 6;
@@ -183,6 +187,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x1e: // ASL Absolute,X
         case 0xde: // DEC Absolute,X
         case 0xfe: // INC Absolute,X
+        case 0x5e: // LSR Absolute,X
             inst->operand1 = memory[pc++];
             inst->operand2 = memory[pc++];
             inst->cycles = 7;
@@ -590,6 +595,23 @@ void CPU::execute_instruction(Instruction *inst) {
             if(inst->operand1 + x > 0xff) inst->cycles++; // page crossed
             LDN(&y, memory[((inst->operand2 << 8 | inst->operand1) + x) & 0xffff]);
             break;
+        case 0x4a: // LSR Accumulator
+            a = LSR(a);
+            break;
+        case 0x46: // LSR Zero Page
+            memory[inst->operand1] = LSR(memory[inst->operand1]);
+            break;
+        case 0x56: // LSR Zero Page,X
+            memory[(inst->operand1 + x) & 0xff] = LSR(memory[(inst->operand1 + x) & 0xff]);
+            break;
+        case 0x4e: // LSR Absolute
+            addr = inst->operand2 << 8 | inst->operand1;
+            memory[addr] = LSR(memory[addr]);
+            break;
+        case 0x5e: // LSR Absolute,X
+            addr = ((inst->operand2 << 8 | inst->operand1) + x) & 0xffff;
+            memory[addr] = LSR(memory[addr]);
+            break;
         case 0xea: // NOP Implied
             break;
         default:
@@ -680,4 +702,11 @@ void CPU::LDN(uint8_t *target, uint8_t value) {
     *target = value;
     if(*target == 0) set_flag(Z); else reset_flag(Z);
     if(*target & 0x80) set_flag(N); else reset_flag(N);
+}
+
+uint8_t CPU::LSR(uint8_t value) {
+    if(value & 0x1) set_flag(C); else reset_flag(C);
+    if(value >> 1 == 0) set_flag(Z); else reset_flag(Z);
+    reset_flag(N);
+    return value >> 1;
 }
