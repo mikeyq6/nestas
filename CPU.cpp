@@ -91,6 +91,10 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
             inst->operand1 = memory[pc++];
             inst->cycles = 2; // +1 if branch taken, +2 if page crossed
             break;
+        case 0x48: // PHA Implied
+        case 0x08: // PHP Implied
+            inst->cycles = 3;
+            break;
         case 0x65: // ADC Zero Page
         case 0x25: // AND Zero Page
         case 0x24: // BIT Zero Page
@@ -109,6 +113,10 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
             inst->operand1 = memory[pc++];
             inst->operand2 = memory[pc++];
             inst->cycles = 3;
+            break;
+        case 0x68: // PLA Implied
+        case 0x28: // PLP Implied
+            inst->cycles = 4;
             break;
         case 0x75: // ADC Zero Page,X
         case 0x35: // AND Zero Page,X
@@ -648,6 +656,22 @@ void CPU::execute_instruction(Instruction *inst) {
             addr = get_indirect_y_address(inst->operand1, &page_crossed);
             if(page_crossed) inst->cycles++; // page crossed
             ORA(memory[addr & 0xffff]);
+            break;
+        case 0x48: // PHA Implied
+            push(a);
+            break;
+        case 0x68: // PLA Implied
+            a = pull();
+            if(a == 0) set_flag(Z); else reset_flag(Z);
+            if(a & 0x80) set_flag(N); else reset_flag(N);
+            break;
+        case 0x08: // PHP Implied
+            push(p | B | O); // When pushing P to the stack, the B flag is set to 1
+            break;
+        case 0x28: // PLP Implied
+            uint8_t pval = pull() & ~(B | O);
+            uint8_t bflags = p & (B | O); 
+            p = pval | bflags;
             break;
         case 0xea: // NOP Implied
             break;

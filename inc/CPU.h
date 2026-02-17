@@ -16,6 +16,7 @@ enum FLAG {
     I = 0x04,
     D = 0x08,
     B = 0x10,
+    O = 0x20, // Unused, always set to 1 when pushed to stack
     V = 0x40,
     N = 0x80
 };
