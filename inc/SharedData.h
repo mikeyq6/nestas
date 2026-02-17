@@ -14,7 +14,6 @@ public:
     ~SharedData();
 
     bool is_running;
-    uint8_t ppu_registers[8];
 
     bool get_is_running();
     void set_is_running(bool value);
@@ -24,7 +23,14 @@ public:
     uint8_t get_ppu_register(uint16_t addr);
     void set_ppu_register(uint16_t addr, uint8_t value);
 
+    uint8_t get_apu_io_register(uint16_t addr);
+    void set_apu_io_register(uint16_t addr, uint8_t value);
+
 private:
 	mutex is_running_mutex;
     mutex ppu_register_mutex;
+    mutex apu_io_register_mutex;
+
+    uint8_t ppu_registers[8];
+    uint8_t apu_io_registers[0x20];
 };

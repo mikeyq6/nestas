@@ -755,6 +755,8 @@ uint8_t CPU::read_memory(uint16_t addr) {
     } else if(addr >= 0x2000 && addr < 0x4000) {
         // Mirror of PPU registers
         return shared_data->get_ppu_register(addr);
+    } else if(addr >= 0x4000 && addr < 0x4020) {
+        return shared_data->get_apu_io_register(addr);
     } else {
         return 0; // Open bus behavior for addresses that are not handled
     }
@@ -766,6 +768,8 @@ void CPU::write_memory(uint16_t addr, uint8_t value) {
     } else if(addr >= 0x2000 && addr < 0x4000) {
         // Mirror of PPU registers
         shared_data->set_ppu_register(addr, value);
+    } else if(addr >= 0x4000 && addr < 0x4020) {
+        shared_data->set_apu_io_register(addr, value);
     } else {
         // No operation
     }
