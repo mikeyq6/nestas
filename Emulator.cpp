@@ -45,6 +45,7 @@ void Emulator::run_display() {
 
 void Emulator::set_program_bytes(const char *bytes, int size) {
     for(int i = 0; i < size; i++) {
+        raw_cartridge_data = bytes;
         // cpu->memory[i] = bytes[i];
     }
 }

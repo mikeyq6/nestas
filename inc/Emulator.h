@@ -24,6 +24,7 @@ private:
     CPU* cpu;
     PPU *ppu;
     SharedData *shared_data;
+    const char *raw_cartridge_data;
 
     void run_cpu();
     void run_display();
