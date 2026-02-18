@@ -9,6 +9,8 @@ uint8_t NROM::read(uint16_t addr) {
     if(addr < 0x2000) {
         return chr_rom[addr];
     } else if(addr >= 0x6000 && addr < 0x8000) {
+        addr = (addr - 0x6000) % prg_ram_size; // Mirror RAM if it's smaller than 8KB
+        return prg_ram[addr];
     } else if(addr >= 0x8000 && addr < 0xc000) {
         return prg_rom[addr - 0x8000];
     } else if(addr >= 0xc000 && addr <= 0xffff) {
@@ -25,6 +27,8 @@ uint8_t NROM::read(uint16_t addr) {
 }
 
 void NROM::write(uint16_t addr, uint8_t value) {
-    // NROM is read-only, so ignore all writes
-    return;
+    if(addr >= 0x6000 && addr < 0x8000) {
+        addr = (addr - 0x6000) % prg_ram_size; // Mirror RAM if it's smaller than 8KB
+        prg_ram[addr] = value;
+    }
 }
