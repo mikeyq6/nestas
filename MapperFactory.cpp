@@ -3,6 +3,7 @@
 #include "inc/mappers/NROM.h"
 #include "inc/mappers/MMC1.h"
 #include "inc/mappers/MMC2.h"
+#include "inc/mappers/INESMapper206.h"
 
 Mapper* MapperFactory::get_mapper(SharedData *shared_data, const char *raw_cartridge_data) {
     uint8_t mapper_type = get_mapper_type(raw_cartridge_data);
@@ -16,6 +17,9 @@ Mapper* MapperFactory::get_mapper(SharedData *shared_data, const char *raw_cartr
             break;
         case 0x09:
             return new MMC2(raw_cartridge_data);
+            break;
+        case 0xce:
+            return new INESMapper206(raw_cartridge_data);
             break;
         default:
             return new MMC1(raw_cartridge_data);
