@@ -43,6 +43,7 @@ public:
     virtual void write(uint16_t addr, uint8_t value) = 0;
 
 protected:
+    constexpr static auto TRAINER_SIZE = 0x200; // 512 bytes
     RomFormat rom_format;
     NametableLayout nametable_layout;
     CPUPPUTiming cpu_ppu_timing;

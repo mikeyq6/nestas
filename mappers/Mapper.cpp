@@ -14,19 +14,12 @@ Mapper::Mapper(const char *raw_cartridge_data) {
 
 Mapper::~Mapper() {
     delete[] prg_rom;
-    delete[] chr_rom;
-    if(prg_ram_size > 0) {
-        delete[] prg_ram;
-    }
-    if(prg_nvram_size > 0) {
-        delete[] prg_nvram;
-    }
-    if(chr_ram_size > 0) {
-         delete[] chr_ram;
-    }
-    if(chr_ram_size > 0) {
-         delete[] chr_nvram;
-    }
+    if(chr_rom_size > 0) delete[] chr_rom;
+    if(prg_ram_size > 0) delete[] prg_ram;
+    if(prg_nvram_size > 0) delete[] prg_nvram;
+    if(chr_ram_size > 0) delete[] chr_ram;
+    if(chr_ram_size > 0) delete[] chr_nvram;
+    if(has_trainer) delete[] trainer_data;
 }
 
 void Mapper::parse_header(const char *raw_cartridge_data) {
@@ -109,7 +102,9 @@ void Mapper::parse_header(const char *raw_cartridge_data) {
             or simply refuse to load the ROM. */
     }
     prg_rom = new uint8_t[prg_rom_size];
-    chr_rom = new uint8_t[chr_rom_size];
+    if(chr_rom_size > 0) {
+        chr_rom = new uint8_t[chr_rom_size];
+    }
     if(prg_ram_size > 0) {
         prg_ram = new uint8_t[prg_ram_size];
     } else {
@@ -130,17 +125,27 @@ void Mapper::parse_header(const char *raw_cartridge_data) {
     } else {
         chr_nvram = nullptr;
     }
+    if(has_trainer) {
+        trainer_data = new uint8_t[TRAINER_SIZE];
+    } else {
+        trainer_data = nullptr;
+    }
 }
 
 void Mapper::read_rom_data(const char *raw_cartridge_data) {
     if(rom_format == NES2) {
 
     } else { // rom_format == NES
-        for(uint32_t i = 0; i < prg_rom_size; i++) {
-            prg_rom[i] = raw_cartridge_data[16 + i];
+        if(has_trainer) {
+            for(uint32_t i = 0; i < TRAINER_SIZE; i++) {
+                trainer_data[i] = raw_cartridge_data[16 + i];
+            }
         }
-        for(uint32_t i = 0; i < chr_rom_size; i++) {
-            chr_rom[i] = raw_cartridge_data[16 + prg_rom_size + i];
+        for(uint32_t i = 0, j = (has_trainer ? TRAINER_SIZE : 0); i < prg_rom_size; i++, j++) {
+            prg_rom[i] = raw_cartridge_data[16 + j];
+        }
+        for(uint32_t i = 0, j = (has_trainer ? TRAINER_SIZE : 0); i < chr_rom_size; i++, j++) {
+            chr_rom[i] = raw_cartridge_data[16 + prg_rom_size + j];
         }
     }
 }
