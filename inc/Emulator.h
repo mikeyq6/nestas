@@ -26,6 +26,7 @@ private:
     CPU* cpu;
     PPU *ppu;
     SharedData *shared_data;
+    Mapper *mapper;
     const char *raw_cartridge_data;
 
     void run_cpu();

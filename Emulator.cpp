@@ -5,7 +5,7 @@ Emulator::Emulator(const char *raw_cartridge_data) {
     
     shared_data = new SharedData();
     display = DisplayFactory::get_display(SDL, shared_data);
-    Mapper *mapper = MapperFactory::get_mapper(shared_data, raw_cartridge_data);
+    mapper = MapperFactory::get_mapper(shared_data, raw_cartridge_data);
     cpu = new CPU(shared_data, mapper);
     ppu = new PPU(shared_data);
 }
@@ -14,6 +14,7 @@ Emulator::~Emulator() {
     delete display;
     delete cpu;
     delete ppu;
+    delete mapper;
 }
 
 void Emulator::init() {

@@ -1,10 +1,6 @@
 #include "../inc/mappers/MBC1.h"
     
 MBC1::MBC1(const char *raw_cartridge_data) : Mapper(raw_cartridge_data) {
-    // this->rom = rom;
-    // this->rom_size = rom_size;
-    // this->ram = ram;
-    // this->ram_size = ram_size;
 }
 MBC1::~MBC1() {}
 
