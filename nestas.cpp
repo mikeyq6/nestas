@@ -33,7 +33,7 @@ bool read_file_contents(string filename) {
         int size = input.tellg();
         input.seekg(0, std::ios::beg);
 
-        vector<byte> buffer(size);
+        buffer = vector<byte>(size);
         input.read(reinterpret_cast<char*>(buffer.data()), size);
         input.close();
 
