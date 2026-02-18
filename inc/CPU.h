@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "Constants.h"
+#include "mappers/Mapper.h"
 #include "SharedData.h"
 
 using std::uint8_t;
@@ -29,7 +30,7 @@ typedef struct _instruction {
 
 class CPU {
 public:
-    CPU(SharedData *shared_data);
+    CPU(SharedData *shared_data, Mapper *mapper);
     ~CPU();
 
     void init();
@@ -44,6 +45,7 @@ private:
     uint16_t pc;
 
     SharedData *shared_data;
+    Mapper *mapper;
 
     uint8_t memory[MEMORY_SIZE];
 

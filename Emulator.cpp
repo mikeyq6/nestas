@@ -1,9 +1,12 @@
 #include "inc/Emulator.h"
 
-Emulator::Emulator() {
+Emulator::Emulator(const char *raw_cartridge_data) {
+    this->raw_cartridge_data = raw_cartridge_data;
+    
     shared_data = new SharedData();
     display = DisplayFactory::get_display(SDL, shared_data);
-    cpu = new CPU(shared_data);
+    Mapper *mapper = MapperFactory::get_mapper(shared_data, raw_cartridge_data);
+    cpu = new CPU(shared_data, mapper);
     ppu = new PPU(shared_data);
 }
 Emulator::~Emulator() {

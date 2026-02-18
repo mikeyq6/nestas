@@ -1,6 +1,6 @@
 #include "inc/CPU.h"
 
-CPU::CPU(SharedData *shared_data) {
+CPU::CPU(SharedData *shared_data, Mapper *mapper) {
     a = 0;
     x = 0;
     y = 0;
@@ -9,6 +9,7 @@ CPU::CPU(SharedData *shared_data) {
     pc = 0;
 
     this->shared_data = shared_data;
+    this->mapper = mapper;
 }
 CPU::~CPU() {
 }

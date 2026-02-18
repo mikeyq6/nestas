@@ -5,6 +5,8 @@
 #include "CPU.h"
 #include "Display.h"
 #include "DisplayFactory.h"
+#include "mappers/Mapper.h"
+#include "MapperFactory.h"
 #include "PPU.h"
 #include "SharedData.h"
 
@@ -12,7 +14,7 @@ using std::thread;
 
 class Emulator {
 public:
-    Emulator();
+    Emulator(const char *raw_cartridge_data);
     ~Emulator();
 
     void init();

@@ -11,14 +11,14 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    emulator = new Emulator();
-    emulator->init();
-
     string rom_file = argv[argc-1];
     if(!read_file_contents(rom_file)) {
         std::cout << "Unable to open file " << rom_file << std::endl;
         return(2);
     }
+
+    emulator = new Emulator(reinterpret_cast<char*>(buffer.data()));
+    emulator->init();
 
     emulator->run();
 
@@ -37,7 +37,7 @@ bool read_file_contents(string filename) {
         input.read(reinterpret_cast<char*>(buffer.data()), size);
         input.close();
 
-        emulator->set_program_bytes(reinterpret_cast<char*>(buffer.data()), size); 
+        // emulator->set_program_bytes(reinterpret_cast<char*>(buffer.data()), size); 
     } else {
         return false;
     } 
