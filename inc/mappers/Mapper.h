@@ -5,6 +5,11 @@
 using std::uint8_t;
 using std::uint32_t;
 
+typedef enum romFormat {
+    NES,
+    NES2
+} RomFormat;
+
 class Mapper {
 public:
     virtual ~Mapper() = default;
@@ -12,6 +17,7 @@ public:
     virtual void write(uint16_t addr, uint8_t value) = 0;
 
 protected:
+    RomFormat rom_format;
     uint8_t *rom;
     uint32_t rom_size;
     uint8_t *ram;
