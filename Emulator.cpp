@@ -20,17 +20,21 @@ void Emulator::init() {
 }
 
 void Emulator::run() {
-    std::thread cpu_thread{[this](){ this->run_cpu(); }};
+    thread cpu_thread{[this](){ this->run_cpu(); }};
+    thread ppu_thread{[this](){ this->run_ppu(); }};
 
     run_display();
     
     cpu_thread.join();
+    ppu_thread.join();
 }
 
 void Emulator::run_cpu() {
-    while(shared_data->get_is_running()) {
-        cpu->run();
-    }
+    cpu->run();
+}
+
+void Emulator::run_ppu() {
+    ppu->run();
 }
 
 void Emulator::run_display() {

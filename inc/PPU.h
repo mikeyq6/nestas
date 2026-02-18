@@ -11,6 +11,8 @@ public:
     ~PPU();
 
     void init();
+    void run();
+    void stop();
 
 private:
     enum PPURegister {

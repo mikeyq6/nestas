@@ -12,3 +12,13 @@ void PPU::init() {
         shared_data->set_ppu_register(i, 0);
     }
 }
+
+void PPU::run() {
+    while(shared_data->get_is_running()) {
+        ;
+    }
+}
+
+void PPU::stop() {
+
+}

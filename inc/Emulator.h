@@ -8,6 +8,8 @@
 #include "PPU.h"
 #include "SharedData.h"
 
+using std::thread;
+
 class Emulator {
 public:
     Emulator();
@@ -25,4 +27,5 @@ private:
 
     void run_cpu();
     void run_display();
+    void run_ppu();
 };
