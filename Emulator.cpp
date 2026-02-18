@@ -4,15 +4,18 @@ Emulator::Emulator() {
     shared_data = new SharedData();
     display = DisplayFactory::get_display(SDL, shared_data);
     cpu = new CPU(shared_data);
+    ppu = new PPU(shared_data);
 }
 Emulator::~Emulator() {
     delete shared_data;
     delete display;
     delete cpu;
+    delete ppu;
 }
 
 void Emulator::init() {
     cpu->init();
+    ppu->init();
     display->init();
 }
 

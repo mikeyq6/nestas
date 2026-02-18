@@ -5,6 +5,7 @@
 #include "CPU.h"
 #include "Display.h"
 #include "DisplayFactory.h"
+#include "PPU.h"
 #include "SharedData.h"
 
 class Emulator {
@@ -19,6 +20,7 @@ public:
 private:
     Display* display;
     CPU* cpu;
+    PPU *ppu;
     SharedData *shared_data;
 
     void run_cpu();

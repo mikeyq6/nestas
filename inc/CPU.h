@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "Constants.h"
-#include "PPU.h"
 #include "SharedData.h"
 
 using std::uint8_t;
@@ -45,7 +44,6 @@ private:
     uint16_t pc;
 
     SharedData *shared_data;
-    PPU *ppu;
 
     uint8_t memory[MEMORY_SIZE];
 
