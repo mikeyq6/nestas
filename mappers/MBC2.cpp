@@ -1,10 +1,10 @@
 #include "../inc/mappers/MBC2.h"
     
-MBC2::MBC2(uint8_t *rom, uint32_t rom_size, uint8_t *ram, uint32_t ram_size) {
-    this->rom = rom;
-    this->rom_size = rom_size;
-    this->ram = ram;
-    this->ram_size = ram_size;
+MBC2::MBC2(const char *raw_cartridge_data) : Mapper(raw_cartridge_data) {
+    // this->rom = rom;
+    // this->rom_size = rom_size;
+    // this->ram = ram;
+    // this->ram_size = ram_size;
 }
 MBC2::~MBC2() {}
 
