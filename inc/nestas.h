@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "Emulator.h"
-#include "CPU.h"
 
 using std::byte;
 using std::string;
