@@ -1,5 +1,7 @@
 #include "../inc/mappers/UxROM.h"
 
+// https://www.nesdev.org/wiki/UxROM
+
 UxROM::UxROM(const char *raw_cartridge_data) : Mapper(raw_cartridge_data) {
 }
 

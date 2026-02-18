@@ -17,6 +17,8 @@ Mapper* MapperFactory::get_mapper(SharedData *shared_data, const char *raw_cartr
             return new MMC1(raw_cartridge_data);
             break;
         case 0x02:
+        case 0x5e:
+        case 0xb4:
             return new UxROM(raw_cartridge_data);
             break;
         case 0x09:
