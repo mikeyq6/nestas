@@ -1,8 +1,8 @@
 #include "inc/MapperFactory.h"
 
 #include "inc/mappers/NROM.h"
-#include "inc/mappers/MBC1.h"
-#include "inc/mappers/MBC2.h"
+#include "inc/mappers/MMC1.h"
+#include "inc/mappers/MMC2.h"
 
 Mapper* MapperFactory::get_mapper(SharedData *shared_data, const char *raw_cartridge_data) {
     uint8_t mapper_type = get_mapper_type(raw_cartridge_data);
@@ -12,13 +12,13 @@ Mapper* MapperFactory::get_mapper(SharedData *shared_data, const char *raw_cartr
             return new NROM(raw_cartridge_data);
             break;
         case 0x01:
-            return new MBC1(raw_cartridge_data);
+            return new MMC1(raw_cartridge_data);
             break;
         case 0x02:
-            return new MBC2(raw_cartridge_data);
+            return new MMC2(raw_cartridge_data);
             break;
         default:
-            return new MBC1(raw_cartridge_data);
+            return new MMC1(raw_cartridge_data);
             break;
     }
 }
