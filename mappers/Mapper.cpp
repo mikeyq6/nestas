@@ -30,8 +30,20 @@ void Mapper::parse_header(const char *raw_cartridge_data) {
     use_alternative_nametables = (raw_cartridge_data[6] & 0x08) != 0;
 
     if(rom_format == NES2) {
-        prg_rom_size = (raw_cartridge_data[4] & 0x0f) | ((raw_cartridge_data[9] & 0xf) << 8);
-        chr_rom_size = (raw_cartridge_data[5] & 0x0f) | ((raw_cartridge_data[9] & 0xf0) << 4);
+        if((raw_cartridge_data[9] & 0xf) == 0xf) {
+            uint8_t exp = raw_cartridge_data[4] & 0xfc;
+            uint8_t mt = ((raw_cartridge_data[4] & 0x03) * 2) + 1;
+            prg_rom_size = mt * (2 << exp);
+        } else {
+            prg_rom_size = (raw_cartridge_data[4] | ((raw_cartridge_data[9] & 0xf) << 8)) * 0x4000;
+        }
+        if((raw_cartridge_data[9] & 0xf0) == 0xf0) {
+            uint8_t exp = raw_cartridge_data[5] & 0xfc;
+            uint8_t mt = ((raw_cartridge_data[5] & 0x03) * 2) + 1;
+            chr_rom_size = mt * (2 << exp);
+        } else {
+            chr_rom_size = ((raw_cartridge_data[5] & 0x0f) | ((raw_cartridge_data[9] & 0xf0) << 4)) * 0x2000;
+        }
         uint8_t shift_count = raw_cartridge_data[10] & 0x0f;
         if(shift_count > 0) {
             prg_ram_size = 0x40 << shift_count;
@@ -56,13 +68,6 @@ void Mapper::parse_header(const char *raw_cartridge_data) {
         } else {
             chr_nvram_size = 0;
         }
-        
-        // for(uint32_t i = 0; i < prg_rom_size; i++) {
-        //     prg_rom[i] = raw_cartridge_data[16 + i];
-        // }
-        // for(uint32_t i = 0; i < chr_rom_size; i++) {
-        //     chr_rom[i] = raw_cartridge_data[16 + prg_rom_size + i];
-        // }
 
         console_type = static_cast<ConsoleType>(raw_cartridge_data[7] & 0x03);
         mapper_number = ((raw_cartridge_data[8] & 0xf) << 8) | ((raw_cartridge_data[6] & 0xf0) >> 4) | (raw_cartridge_data[7] & 0xf0);
@@ -76,6 +81,8 @@ void Mapper::parse_header(const char *raw_cartridge_data) {
             extended_console_type = raw_cartridge_data[13] & 0xf;
         }
         num_miscellaneous_roms = raw_cartridge_data[14] & 0x03;
+        // TODO: Implement miscellaneous roms data, although it's not used often, see https://www.nesdev.org/wiki/NES_2.0#Miscellaneous_ROM_Area
+
         default_expansion_device = raw_cartridge_data[15] & 0x3f;
     } else { // rom_format == NES
         prg_rom_size = raw_cartridge_data[4] * 0x4000; // 16KB units
@@ -133,19 +140,15 @@ void Mapper::parse_header(const char *raw_cartridge_data) {
 }
 
 void Mapper::read_rom_data(const char *raw_cartridge_data) {
-    if(rom_format == NES2) {
-
-    } else { // rom_format == NES
-        if(has_trainer) {
-            for(uint32_t i = 0; i < TRAINER_SIZE; i++) {
-                trainer_data[i] = raw_cartridge_data[16 + i];
-            }
+    if(has_trainer) {
+        for(uint32_t i = 0; i < TRAINER_SIZE; i++) {
+            trainer_data[i] = raw_cartridge_data[16 + i];
         }
-        for(uint32_t i = 0, j = (has_trainer ? TRAINER_SIZE : 0); i < prg_rom_size; i++, j++) {
-            prg_rom[i] = raw_cartridge_data[16 + j];
-        }
-        for(uint32_t i = 0, j = (has_trainer ? TRAINER_SIZE : 0); i < chr_rom_size; i++, j++) {
-            chr_rom[i] = raw_cartridge_data[16 + prg_rom_size + j];
-        }
+    }
+    for(uint64_t i = 0, j = (has_trainer ? TRAINER_SIZE : 0); i < prg_rom_size; i++, j++) {
+        prg_rom[i] = raw_cartridge_data[16 + j];
+    }
+    for(uint64_t i = 0, j = (has_trainer ? TRAINER_SIZE : 0); i < chr_rom_size; i++, j++) {
+        chr_rom[i] = raw_cartridge_data[16 + prg_rom_size + j];
     }
 }

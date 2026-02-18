@@ -5,6 +5,7 @@
 using std::uint8_t;
 using std::uint16_t;
 using std::uint32_t;
+using std::uint64_t;
 
 enum RomFormat {
     NES,
@@ -53,25 +54,25 @@ protected:
     bool use_alternative_nametables;
     bool uses_chr_ram;
     uint8_t *prg_rom;
-    uint32_t prg_rom_size;
+    uint64_t prg_rom_size = 0;
     uint8_t *chr_rom;
-    uint32_t chr_rom_size;
+    uint64_t chr_rom_size = 0;
     uint8_t *prg_ram;
-    uint32_t prg_ram_size;
+    uint32_t prg_ram_size = 0;
     uint8_t *prg_nvram;
-    uint32_t prg_nvram_size;
+    uint32_t prg_nvram_size = 0;
     uint8_t *chr_ram;
-    uint32_t chr_ram_size;
+    uint32_t chr_ram_size = 0;
     uint8_t *chr_nvram;
-    uint32_t chr_nvram_size;
+    uint32_t chr_nvram_size = 0;
     uint8_t *trainer_data;
     ConsoleType console_type;
-    uint16_t mapper_number;
-    uint8_t submapper_number;
+    uint16_t mapper_number = 0;
+    uint8_t submapper_number = 0;
     uint8_t ppu_type;
     uint8_t hardware_type;
     uint8_t extended_console_type;
-    uint8_t num_miscellaneous_roms;
+    uint8_t num_miscellaneous_roms = 0;
     uint8_t default_expansion_device;
 
 private:
