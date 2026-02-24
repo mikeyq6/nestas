@@ -31,5 +31,4 @@ private:
 
     void run_cpu();
     void run_display();
-    void run_ppu();
 };

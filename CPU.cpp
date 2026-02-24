@@ -1,6 +1,6 @@
 #include "inc/CPU.h"
 
-CPU::CPU(SharedData *shared_data, Mapper *mapper) {
+CPU::CPU(SharedData *shared_data, PPU *ppu, Mapper *mapper) {
     a = 0;
     x = 0;
     y = 0;
@@ -10,6 +10,7 @@ CPU::CPU(SharedData *shared_data, Mapper *mapper) {
 
     this->shared_data = shared_data;
     this->mapper = mapper;
+    this->ppu = ppu;
 }
 CPU::~CPU() {
 }
@@ -39,6 +40,9 @@ void CPU::run() {
 
         // execute
         execute_instruction(&inst);
+
+        // Kick off PPU cycles
+        ppu->run_cpu_cycle(inst.cycles);
 
         // check interrupts
     }

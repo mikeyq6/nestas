@@ -5,6 +5,7 @@
 
 #include "Constants.h"
 #include "mappers/Mapper.h"
+#include "PPU.h"
 #include "SharedData.h"
 
 using std::uint8_t;
@@ -30,7 +31,7 @@ typedef struct _instruction {
 
 class CPU {
 public:
-    CPU(SharedData *shared_data, Mapper *mapper);
+    CPU(SharedData *shared_data, PPU *ppu, Mapper *mapper);
     ~CPU();
 
     void init();
@@ -46,6 +47,7 @@ private:
 
     SharedData *shared_data;
     Mapper *mapper;
+    PPU *ppu;
 
     uint8_t memory[MEMORY_SIZE];
 

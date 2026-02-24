@@ -6,8 +6,8 @@ Emulator::Emulator(const char *raw_cartridge_data) {
     shared_data = new SharedData();
     display = DisplayFactory::get_display(SDL, shared_data);
     mapper = MapperFactory::get_mapper(shared_data, raw_cartridge_data);
-    cpu = new CPU(shared_data, mapper);
     ppu = new PPU(shared_data);
+    cpu = new CPU(shared_data, ppu, mapper);
 }
 Emulator::~Emulator() {
     delete shared_data;
@@ -25,20 +25,14 @@ void Emulator::init() {
 
 void Emulator::run() {
     thread cpu_thread{[this](){ this->run_cpu(); }};
-    thread ppu_thread{[this](){ this->run_ppu(); }};
 
     run_display();
     
     cpu_thread.join();
-    ppu_thread.join();
 }
 
 void Emulator::run_cpu() {
     cpu->run();
-}
-
-void Emulator::run_ppu() {
-    ppu->run();
 }
 
 void Emulator::run_display() {
