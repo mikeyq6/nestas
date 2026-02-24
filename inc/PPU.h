@@ -13,7 +13,6 @@ public:
     ~PPU();
 
     void init();
-    void stop();
     void run_cpu_cycle(uint8_t cycles);
 
 private:

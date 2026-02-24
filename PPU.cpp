@@ -23,10 +23,6 @@ void PPU::run_cpu_cycle(uint8_t cycles) {
     set_pixels_for(ppu_dots);
 }
 
-void PPU::stop() {
-
-}
-
 void PPU::set_pixels_for(uint16_t num_dots) {
     // TODO
 }
