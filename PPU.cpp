@@ -88,6 +88,10 @@ void PPU::set_oam_data() {
     }
 }
 
+void PPU::oam_dma(uint8_t value) {
+    // TODO
+}
+
 void PPU::set_pixels_for(uint16_t num_dots) {
     // TODO
 }

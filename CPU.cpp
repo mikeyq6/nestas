@@ -770,6 +770,8 @@ void CPU::write_memory(uint16_t addr, uint8_t value) {
     } else if(addr >= 0x2000 && addr < 0x4000) {
         // Mirror of PPU registers
         ppu->set_register(addr & 0x7, value);
+    } else if(addr == 0x4014) {
+        ppu->oam_dma(value);
     } else if(addr >= 0x4000 && addr < 0x4020) {
         shared_data->set_apu_io_register(addr, value);
     } else if(addr >= 0x4020) {
