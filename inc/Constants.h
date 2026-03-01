@@ -8,3 +8,4 @@ constexpr auto SLEEP_DISPLAY_MS = 30;
 
 constexpr auto NUM_DOTS = 341;
 constexpr auto NUM_SCANLINES = 262;
+constexpr auto VISIBLE_SCANLINES = 240;

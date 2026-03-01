@@ -2,6 +2,9 @@
 
 #include <mutex>
 #include <random>
+#include <vector>
+
+#include "Constants.h"
 
 using std::mutex;
 using std::lock_guard;
@@ -30,6 +33,8 @@ private:
 	mutex is_running_mutex;
     mutex ppu_register_mutex;
     mutex apu_io_register_mutex;
+
+    uint8_t pixels[NUM_PIXELS];
 
     uint8_t ppu_registers[8];
     uint8_t apu_io_registers[0x20];

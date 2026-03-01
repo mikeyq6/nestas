@@ -16,11 +16,26 @@ void PPU::init() {
 }
 
 void PPU::run_cpu_cycle(uint8_t cycles) {
-    if(!is_rendering_enabled()) {
-        return;
-    }
     uint16_t ppu_dots = cycles * 3;
-    set_pixels_for(ppu_dots);
+
+    if(is_rendering_enabled()) {
+        set_pixels_for(ppu_dots);
+    }
+    if(ppu_dots + dot_counter >= NUM_DOTS) {
+        // End of scanline
+        dot_counter = (dot_counter + ppu_dots) % NUM_DOTS;
+        scanline_counter++;
+        if(scanline_counter == VISIBLE_SCANLINES + 1 && dot_counter > 0) { 
+            // Start of vblank
+            set_vblank();
+        } else if(scanline_counter > NUM_SCANLINES) {
+            // End of vblank, start of new frame
+            clear_vblank();
+            scanline_counter = 0;
+        }
+    } else {
+        dot_counter += ppu_dots;
+    }
 }
 
 void PPU::set_pixels_for(uint16_t num_dots) {

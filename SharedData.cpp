@@ -2,6 +2,7 @@
 
 SharedData::SharedData() {
     is_running = true;
+    std::fill(pixels, pixels + NUM_PIXELS, 0);
 }
 SharedData::~SharedData() {
 
