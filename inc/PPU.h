@@ -45,6 +45,7 @@ private:
     uint16_t scanline_counter;
 
     Oam oam_data[OAM_SIZE];
+    void set_oam_data();
 
     SharedData *shared_data;
 

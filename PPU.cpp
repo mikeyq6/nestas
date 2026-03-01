@@ -19,14 +19,32 @@ void PPU::init() {
 }
 
 uint8_t PPU::get_register(uint8_t reg) {
-    return registers[reg];
+    switch(reg) {
+        case OAMDATA:
+        case OAMADDR:
+        default:
+            return registers[reg];
+            break;
+    }
 }
 void PPU::set_register(uint8_t reg, uint8_t value) {
-    registers[reg] = value;
+    switch(reg) {
+        case OAMDATA:
+            set_oam_data();
+            registers[OAMADDR] = registers[OAMADDR] + 1;
+            break;
+        case OAMADDR:
+        default:
+            registers[reg] = value;
+            break;
+    }
+    
 }
 
 void PPU::run_cpu_cycle(uint8_t cycles) {
     uint16_t ppu_dots = cycles * 3;
+
+    // TODO: Handle oamaddr bug when value > 8, see https://www.nesdev.org/wiki/PPU_registers#Values_during_rendering
 
     if(is_rendering_enabled()) {
         set_pixels_for(ppu_dots);
@@ -38,6 +56,8 @@ void PPU::run_cpu_cycle(uint8_t cycles) {
         if(scanline_counter == VISIBLE_SCANLINES + 1 && dot_counter > 0) { 
             // Start of vblank
             set_vblank();
+            // reset OAMADDR
+            set_register(OAMADDR, 0);
         } else if(scanline_counter > NUM_SCANLINES) {
             // End of vblank, start of new frame
             clear_vblank();
@@ -45,6 +65,26 @@ void PPU::run_cpu_cycle(uint8_t cycles) {
         }
     } else {
         dot_counter += ppu_dots;
+    }
+}
+
+void PPU::set_oam_data() {
+    uint8_t data = get_register(OAMDATA);
+    uint8_t oamaddr = get_register(OAMADDR);
+    uint8_t index = oamaddr / 4;
+    switch(oamaddr % 4) {
+        case 0:
+            oam_data[index].y = data;
+            break;
+        case 1:
+            oam_data[index].tile_index = data;
+            break;
+        case 2:
+            oam_data[index].attributes = data;
+            break;
+        case 3:
+            oam_data[index].x = data;
+            break;
     }
 }
 
