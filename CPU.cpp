@@ -754,7 +754,7 @@ uint8_t CPU::read_memory(uint16_t addr) {
         return memory[addr & 0x7ff]; // Mirror of internal RAM every 2KB
     } else if(addr >= 0x2000 && addr < 0x4000) {
         // Mirror of PPU registers
-        return shared_data->get_ppu_register(addr);
+        return ppu->get_register(addr & 0x7);
     } else if(addr >= 0x4000 && addr < 0x4020) {
         return shared_data->get_apu_io_register(addr);
     } else if(addr >= 0x4020) {
@@ -769,7 +769,7 @@ void CPU::write_memory(uint16_t addr, uint8_t value) {
         memory[addr & 0x7ff] = value; // Mirror of internal RAM every 2KB
     } else if(addr >= 0x2000 && addr < 0x4000) {
         // Mirror of PPU registers
-        shared_data->set_ppu_register(addr, value);
+        ppu->set_register(addr & 0x7, value);
     } else if(addr >= 0x4000 && addr < 0x4020) {
         shared_data->set_apu_io_register(addr, value);
     } else if(addr >= 0x4020) {
