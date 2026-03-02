@@ -82,6 +82,7 @@ private:
     void ORA(uint8_t value);
     uint8_t ROL(uint8_t value);
     uint8_t ROR(uint8_t value);
+    void SBC(uint8_t value);
 
     void dma(uint8_t value);
 };

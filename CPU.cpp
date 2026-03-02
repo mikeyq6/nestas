@@ -90,6 +90,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0xa2: // LDX Immediate
         case 0xa0: // LDY Immediate
         case 0x09: // ORA Immediate
+        case 0xe9: // SBC Immediate
             inst->operand1 = read_memory(pc++);
             inst->cycles = 2; // +1 if branch taken, +2 if page crossed
             break;
@@ -108,6 +109,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0xa6: // LDX Zero Page
         case 0xa4: // LDY Zero Page
         case 0x05: // ORA Zero Page
+        case 0xe5: // SBC Zero Page
             inst->operand1 = read_memory(pc++);
             inst->cycles = 3;
             break;
@@ -128,6 +130,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0xb6: // LDX Zero Page,Y
         case 0xb4: // LDY Zero Page,X
         case 0x15: // ORA Zero Page,X
+        case 0xf5: // SBC Zero Page,X
             inst->operand1 = read_memory(pc++);
             inst->cycles = 4;
             break;
@@ -155,6 +158,9 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x0d: // ORA Absolute
         case 0x1d: // ORA Absolute,X
         case 0x19: // ORA Absolute,Y
+        case 0xed: // SBC Absolute
+        case 0xfd: // SBC Absolute,X
+        case 0xf9: // SBC Absolute,Y
             inst->operand1 = read_memory(pc++);
             inst->operand2 = read_memory(pc++);
             inst->cycles = 4; // +1 if page crossed
@@ -171,6 +177,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x11: // ORA (Indirect),Y
         case 0x26: // ROL Zero Page
         case 0x66: // ROR Zero Page
+        case 0xf1: // SBC (Indirect),Y
             inst->operand1 = read_memory(pc++);
             inst->cycles = 5; // +1 if page crossed
             break;
@@ -195,6 +202,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x01: // ORA (Indirect,X)
         case 0x36: // ROL Zero Page,X
         case 0x76: // ROR Zero Page,X
+        case 0xe1: // SBC (Indirect,X)
             inst->operand1 = read_memory(pc++);
             inst->cycles = 6;
             break;
@@ -728,6 +736,35 @@ void CPU::execute_instruction(Instruction *inst) {
         case 0x60: // RTS Implied
             pc = (pull() | (pull() << 8)) + 1;
             break;
+        case 0xe9: // SBC Immediate
+            SBC(inst->operand1);
+            break;
+        case 0xe5: // SBC Zero Page
+            SBC(read_memory(inst->operand1));
+            break;
+        case 0xf5: // SBC Zero Page,X
+            SBC(read_memory((inst->operand1 + x) & 0xff));
+            break;
+        case 0xed: // SBC Absolute
+            SBC(read_memory(inst->operand2 << 8 | inst->operand1));
+            break;
+        case 0xfd: // SBC Absolute,X
+            if(inst->operand1 + x > 0xff) inst->cycles++; // page crossed
+            SBC(read_memory(((inst->operand2 << 8 | inst->operand1) + x) & 0xffff));
+            break;
+        case 0xf9: // SBC Absolute,Y
+            if(inst->operand1 + y > 0xff) inst->cycles++; // page crossed
+            SBC(read_memory(((inst->operand2 << 8 | inst->operand1) + y) & 0xffff));
+            break;
+        case 0xe1: // SBC (Indirect,X)
+            addr = get_indirect_x_address(inst->operand1);
+            SBC(read_memory(addr & 0xffff));
+            break;
+        case 0xf1: // SBC (Indirect),Y
+            addr = get_indirect_y_address(inst->operand1, &page_crossed);
+            if(page_crossed) inst->cycles++; // page crossed
+            SBC(read_memory(addr & 0xffff));
+            break;
         case 0xea: // NOP Implied
             break;
         default:
@@ -897,4 +934,13 @@ uint8_t CPU::ROR(uint8_t value) {
     if(value == 0) set_flag(Z); else reset_flag(Z);
     if(value & 0x80) set_flag(N); else reset_flag(N);
     return value;
+}
+
+void CPU::SBC(uint8_t value) {
+    uint16_t diff = a - value - (is_set(C) ? 0 : 1);
+    if(diff < 0x100) set_flag(C); else reset_flag(C);
+    if((diff & 0xff) == 0) set_flag(Z); else reset_flag(Z);
+    if(diff & 0x80) set_flag(N); else reset_flag(N);
+    if (((a ^ value) & 0x80) != 0 && ((a ^ diff) & 0x80) != 0) set_flag(V); else reset_flag(V);   
+    a = diff & 0xff;
 }
