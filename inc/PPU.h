@@ -25,7 +25,7 @@ public:
 
     uint8_t get_register(uint8_t reg);
     void set_register(uint8_t reg, uint8_t value);
-    void oam_dma(uint8_t value);
+    void oam_dma(uint8_t *oam_buffer);
 
     enum PPURegister {
         PPUCTRL = 0x0,

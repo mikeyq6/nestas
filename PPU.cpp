@@ -88,8 +88,25 @@ void PPU::set_oam_data() {
     }
 }
 
-void PPU::oam_dma(uint8_t value) {
-    // TODO
+void PPU::oam_dma(uint8_t *oam_buffer) {
+    for(int i=0; i<OAM_BUFFER_SIZE; i++) {
+        uint8_t data = oam_buffer[i];
+        uint8_t index = i / 4;
+        switch(i % 4) {
+            case 0:
+                oam_data[index].y = data;
+                break;
+            case 1:
+                oam_data[index].tile_index = data;
+                break;
+            case 2:
+                oam_data[index].attributes = data;
+                break;
+            case 3:
+                oam_data[index].x = data;
+                break;
+        }
+    }
 }
 
 void PPU::set_pixels_for(uint16_t num_dots) {

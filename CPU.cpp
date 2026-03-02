@@ -771,7 +771,7 @@ void CPU::write_memory(uint16_t addr, uint8_t value) {
         // Mirror of PPU registers
         ppu->set_register(addr & 0x7, value);
     } else if(addr == 0x4014) {
-        ppu->oam_dma(value);
+        dma(value);
     } else if(addr >= 0x4000 && addr < 0x4020) {
         shared_data->set_apu_io_register(addr, value);
     } else if(addr >= 0x4020) {
@@ -793,6 +793,14 @@ void CPU::reset_flag(FLAG flag) {
 }
 bool CPU::is_set(FLAG flag) {
     return (p & flag) != 0;
+}
+
+void CPU::dma(uint8_t value) {
+    uint16_t source_addr = value << 8; // OAM DMA always reads from a page boundary
+    for(int i=0; i<256; i++) {
+        oam_buffer[i] = read_memory(source_addr + i);
+    }
+    ppu->oam_dma(oam_buffer);
 }
 
 // stack operations

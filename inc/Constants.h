@@ -10,3 +10,4 @@ constexpr auto NUM_DOTS = 341;
 constexpr auto NUM_SCANLINES = 262;
 constexpr auto VISIBLE_SCANLINES = 240;
 constexpr auto OAM_SIZE = 64;
+constexpr auto OAM_BUFFER_SIZE = 256;

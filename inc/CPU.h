@@ -50,6 +50,7 @@ private:
     PPU *ppu;
 
     uint8_t memory[MEMORY_SIZE];
+    uint8_t oam_buffer[OAM_BUFFER_SIZE]; // Buffer for OAM DMA
 
     void set_flag(FLAG flag);
     void reset_flag(FLAG flag);
@@ -81,4 +82,6 @@ private:
     void ORA(uint8_t value);
     uint8_t ROL(uint8_t value);
     uint8_t ROR(uint8_t value);
+
+    void dma(uint8_t value);
 };
