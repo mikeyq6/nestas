@@ -16,12 +16,29 @@ void PPU::init() {
     for(int i=0; i<OAM_SIZE; i++) {
         oam_data[i] = {0, 0, 0, 0};
     }
+    w = 0;
+    x_scroll = y_scroll = ppu_addr = 0;
+    vram_increment = 0;
+    base_nametable_addr = 0x2000; // Default to nametable 0
+    sprite_pattern_base_addr = 0; // Default to 8x8 sprites with pattern table 0
+    background_base_addr = 0; // Default to pattern table 0 for background
+    sprite_size = 0;
 }
 
 uint8_t PPU::get_register(uint8_t reg) {
     switch(reg) {
+        case PPUSTATUS: 
+            return registers[PPUSTATUS] & 0xe0; // Only bits 7-5 are readable
+            break;
+        case PPUMASK:
+        case PPUCTRL:
+        case PPUSCROLL:
+        case PPUADDR:
+            return 0; 
+            break;
         case OAMDATA:
         case OAMADDR:
+        case PPUDATA:
         default:
             return registers[reg];
             break;
@@ -33,7 +50,51 @@ void PPU::set_register(uint8_t reg, uint8_t value) {
             set_oam_data();
             registers[OAMADDR] = registers[OAMADDR] + 1;
             break;
+        case PPUSTATUS: // Writing to this register has no effect
+            break;
+        case PPUSCROLL:
+            if(w == 0) {
+                x_scroll = value;
+            } else {
+                y_scroll = value;
+            }
+            w = (w + 1) % 2;
+            break;
+        case PPUADDR:
+            if(w == 0) {
+                ppu_addr |= value;
+            } else {
+                ppu_addr = (value & 0x3f) << 8 | x_scroll; // Only bits 13-8 are writable, lower 8 bits come from first write
+            }
+            w = (w + 1) % 2;
+            break;
+        case PPUDATA:
+            registers[reg] = value;
+            registers[PPUADDR] = (registers[PPUADDR] + vram_increment) & 0xffff; // Increment PPUADDR after write
+            break;
+        case PPUCTRL:
+            vram_increment = (value & 0x4) ? 32 : 1; // Set VRAM address increment based on bit 2 of PPUCTRL
+            switch(value & 0x3) { // Set base nametable address based on bits 1-0 of PPUCTRL
+                case 0:
+                    base_nametable_addr = 0x2000;
+                    break;
+                case 1:
+                    base_nametable_addr = 0x2400;
+                    break;
+                case 2:
+                    base_nametable_addr = 0x2800;
+                    break;
+                case 3:
+                    base_nametable_addr = 0x2c00;
+                    break;
+            }
+            sprite_pattern_base_addr = (value & 0x8) ? 0x1000 : 0;
+            background_base_addr = (value & 0x10) ? 0x1000 : 0;
+            sprite_size = (value & 0x20) ? 16 : 8;
+            vblank_enable = (value & 0x80) != 0 ? 1 : 0;
+            break;
         case OAMADDR:
+        case PPUMASK:
         default:
             registers[reg] = value;
             break;
