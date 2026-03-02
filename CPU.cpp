@@ -70,6 +70,12 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x4a: // LSR Accumulator
         case 0x2a: // ROL Accumulator
         case 0x6a: // ROR Accumulator
+        case 0xaa: // TAX Implied
+        case 0xa8: // TAY Implied
+        case 0xba: // TSX Implied
+        case 0x8a: // TXA Implied
+        case 0x9a: // TXS Implied
+        case 0x98: // TYA Implied
             inst->cycles = 2;
             break;
         case 0x69: // ADC Immediate
@@ -816,6 +822,36 @@ void CPU::execute_instruction(Instruction *inst) {
             break;
         case 0x8c: // STY Absolute
             write_memory(inst->operand2 << 8 | inst->operand1, y);
+            break;
+        case 0xaa: // TAX Implied
+            x = a;
+            if(x == 0) set_flag(Z); else reset_flag(Z);
+            if(x & 0x80) set_flag(N); else reset_flag(N);
+            break;
+        case 0xa8: // TAY Implied
+            y = a;
+            if(y == 0) set_flag(Z); else reset_flag(Z);
+            if(y & 0x80) set_flag(N); else reset_flag(N);
+            break;
+        case 0xba: // TSX Implied
+            x = s;
+            if(x == 0) set_flag(Z); else reset_flag(Z);
+            if(x & 0x80) set_flag(N); else reset_flag(N);
+            break;
+        case 0x8a: // TXA Implied
+            a = x;
+            if(a == 0) set_flag(Z); else reset_flag(Z);
+            if(a & 0x80) set_flag(N); else reset_flag(N);
+            break;
+        case 0x9a: // TXS Implied
+            s = x;
+            if(s == 0) set_flag(Z); else reset_flag(Z);
+            if(s & 0x80) set_flag(N); else reset_flag(N);
+            break;
+        case 0x98: // TYA Implied
+            a = y;
+            if(a == 0) set_flag(Z); else reset_flag(Z);
+            if(a & 0x80) set_flag(N); else reset_flag(N);
             break;
         case 0xea: // NOP Implied
             break;
