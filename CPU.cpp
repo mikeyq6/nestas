@@ -110,6 +110,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0xa4: // LDY Zero Page
         case 0x05: // ORA Zero Page
         case 0xe5: // SBC Zero Page
+        case 0x85: // STA Zero Page
             inst->operand1 = read_memory(pc++);
             inst->cycles = 3;
             break;
@@ -131,6 +132,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0xb4: // LDY Zero Page,X
         case 0x15: // ORA Zero Page,X
         case 0xf5: // SBC Zero Page,X
+        case 0x95: // STA Zero Page,X
             inst->operand1 = read_memory(pc++);
             inst->cycles = 4;
             break;
@@ -161,6 +163,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0xed: // SBC Absolute
         case 0xfd: // SBC Absolute,X
         case 0xf9: // SBC Absolute,Y
+        case 0x8d: // STA Absolute
             inst->operand1 = read_memory(pc++);
             inst->operand2 = read_memory(pc++);
             inst->cycles = 4; // +1 if page crossed
@@ -178,6 +181,8 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x26: // ROL Zero Page
         case 0x66: // ROR Zero Page
         case 0xf1: // SBC (Indirect),Y
+        case 0x9d: // STA (Indirect),Y
+        case 0x99: // STA Absolute,Y
             inst->operand1 = read_memory(pc++);
             inst->cycles = 5; // +1 if page crossed
             break;
@@ -203,6 +208,8 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x36: // ROL Zero Page,X
         case 0x76: // ROR Zero Page,X
         case 0xe1: // SBC (Indirect,X)
+        case 0x81: // STA (Indirect,X)
+        case 0x91: // STA (Indirect),Y
             inst->operand1 = read_memory(pc++);
             inst->cycles = 6;
             break;
@@ -764,6 +771,27 @@ void CPU::execute_instruction(Instruction *inst) {
             addr = get_indirect_y_address(inst->operand1, &page_crossed);
             if(page_crossed) inst->cycles++; // page crossed
             SBC(read_memory(addr & 0xffff));
+            break;
+        case 0x85: // STA Zero Page
+            write_memory(inst->operand1, a);
+            break;
+        case 0x95: // STA Zero Page,X
+            write_memory((inst->operand1 + x) & 0xff, a);
+            break;
+        case 0x8d: // STA Absolute
+            write_memory(inst->operand2 << 8 | inst->operand1, a);
+            break;
+        case 0x9d: // STA Absolute,X
+            write_memory(((inst->operand2 << 8 | inst->operand1) + x) & 0xffff, a);
+            break;
+        case 0x99: // STA Absolute,Y
+            write_memory(((inst->operand2 << 8 | inst->operand1) + y) & 0xffff, a);
+            break;
+        case 0x81: // STA (Indirect,X)
+            write_memory(get_indirect_x_address(inst->operand1), a);
+            break;
+        case 0x91: // STA (Indirect),Y
+            write_memory(get_indirect_y_address(inst->operand1, &page_crossed), a);
             break;
         case 0xea: // NOP Implied
             break;
