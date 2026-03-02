@@ -111,6 +111,8 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x05: // ORA Zero Page
         case 0xe5: // SBC Zero Page
         case 0x85: // STA Zero Page
+        case 0x86: // STX Zero Page
+        case 0x84: // STY Zero Page
             inst->operand1 = read_memory(pc++);
             inst->cycles = 3;
             break;
@@ -133,6 +135,8 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x15: // ORA Zero Page,X
         case 0xf5: // SBC Zero Page,X
         case 0x95: // STA Zero Page,X
+        case 0x96: // STX Zero Page,Y
+        case 0x94: // STY Zero Page,X
             inst->operand1 = read_memory(pc++);
             inst->cycles = 4;
             break;
@@ -164,6 +168,8 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0xfd: // SBC Absolute,X
         case 0xf9: // SBC Absolute,Y
         case 0x8d: // STA Absolute
+        case 0x8e: // STX Absolute
+        case 0x8c: // STY Absolute
             inst->operand1 = read_memory(pc++);
             inst->operand2 = read_memory(pc++);
             inst->cycles = 4; // +1 if page crossed
@@ -792,6 +798,24 @@ void CPU::execute_instruction(Instruction *inst) {
             break;
         case 0x91: // STA (Indirect),Y
             write_memory(get_indirect_y_address(inst->operand1, &page_crossed), a);
+            break;
+        case 0x86: // STX Zero Page
+            write_memory(inst->operand1, x);
+            break;
+        case 0x96: // STX Zero Page,Y
+            write_memory((inst->operand1 + y) & 0xff, x);
+            break;
+        case 0x8e: // STX Absolute
+            write_memory(inst->operand2 << 8 | inst->operand1, x);
+            break;
+        case 0x84: // STY Zero Page
+            write_memory(inst->operand1, y);
+            break;
+        case 0x94: // STY Zero Page,X
+            write_memory((inst->operand1 + x) & 0xff, y);
+            break;
+        case 0x8c: // STY Absolute
+            write_memory(inst->operand2 << 8 | inst->operand1, y);
             break;
         case 0xea: // NOP Implied
             break;
