@@ -45,6 +45,7 @@ void CPU::run() {
         ppu->run_cpu_cycle(inst.cycles);
 
         // check interrupts
+        check_interrupts();
     }
 }
 
@@ -1031,4 +1032,8 @@ void CPU::SBC(uint8_t value) {
     if(diff & 0x80) set_flag(N); else reset_flag(N);
     if (((a ^ value) & 0x80) != 0 && ((a ^ diff) & 0x80) != 0) set_flag(V); else reset_flag(V);   
     a = diff & 0xff;
+}
+
+void CPU::check_interrupts() {
+
 }

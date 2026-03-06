@@ -56,6 +56,8 @@ private:
     void reset_flag(FLAG flag);
     bool is_set(FLAG flag);
 
+    void check_interrupts();
+
     void get_next_instruction(uint8_t *inst);
     void decode_instruction(uint8_t cur_inst, Instruction *inst);
     void execute_instruction(Instruction *inst);
