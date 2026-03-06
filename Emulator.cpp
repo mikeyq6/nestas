@@ -6,7 +6,8 @@ Emulator::Emulator(const char *raw_cartridge_data) {
     shared_data = new SharedData();
     display = DisplayFactory::get_display(SDL, shared_data);
     mapper = MapperFactory::get_mapper(shared_data, raw_cartridge_data);
-    ppu = new PPU(shared_data);
+    mapper_for_ppu = MapperFactory::get_mapper(shared_data, raw_cartridge_data); // it's all static data, so create a copy for PPU rather than share between threads
+    ppu = new PPU(shared_data, mapper_for_ppu);
     cpu = new CPU(shared_data, ppu, mapper);
 }
 Emulator::~Emulator() {

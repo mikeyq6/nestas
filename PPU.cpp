@@ -1,7 +1,8 @@
 #include "inc/PPU.h"
 
-PPU::PPU(SharedData *shared_data) {
+PPU::PPU(SharedData *shared_data, Mapper *mapper) {
     this->shared_data = shared_data;
+    this->mapper = mapper;
 }
 PPU::~PPU() {
 

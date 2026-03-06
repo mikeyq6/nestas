@@ -5,6 +5,7 @@
 
 #include "Constants.h"
 #include "SharedData.h"
+#include "mappers/Mapper.h"
 
 using std::uint8_t;
 
@@ -17,7 +18,7 @@ typedef struct oam {
 
 class PPU {
 public:
-    PPU(SharedData *shared_data);
+    PPU(SharedData *shared_data, Mapper *mapper);
     ~PPU();
 
     void init();
@@ -48,6 +49,8 @@ private:
 
     uint16_t dot_counter;
     uint16_t scanline_counter;
+
+    Mapper *mapper;
 
     Oam oam_data[OAM_SIZE];
     void set_oam_data();
