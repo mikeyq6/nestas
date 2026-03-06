@@ -19,7 +19,6 @@ public:
 
     void init();
     void run();
-    void set_program_bytes(const char *bytes, int size);
 
 private:
     Display* display;

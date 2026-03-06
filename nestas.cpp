@@ -36,8 +36,6 @@ bool read_file_contents(string filename) {
         buffer = vector<byte>(size);
         input.read(reinterpret_cast<char*>(buffer.data()), size);
         input.close();
-
-        // emulator->set_program_bytes(reinterpret_cast<char*>(buffer.data()), size); 
     } else {
         return false;
     } 
