@@ -167,6 +167,7 @@ void PPU::set_oam_buffer() {
         }
     }
 }
+
 bool PPU::sprite_is_in_scanline(oam sprite) {
     // case for 8x8 sprites, TODO: 8x16
     return (sprite.y > current_scanline - 8 && sprite.y <= current_scanline);
