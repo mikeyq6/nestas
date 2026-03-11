@@ -53,7 +53,10 @@ private:
     Mapper *mapper;
 
     Oam oam_data[OAM_SIZE];
+    Oam oam_buffer[MAX_SPRITES]; // Buffer for sprites on current scanline
+
     void set_oam_data();
+    void set_oam_buffer();
 
     SharedData *shared_data;
 
@@ -61,5 +64,8 @@ private:
     bool is_rendering_enabled();
     void set_vblank();
     void clear_vblank();
+
+    uint8_t read_address(uint16_t addr);
+
 
 };

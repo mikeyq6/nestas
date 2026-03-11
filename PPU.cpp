@@ -150,6 +150,14 @@ void PPU::set_oam_data() {
     }
 }
 
+void PPU::set_oam_buffer() {
+    for(int i=0; i<OAM_SIZE; i++) {
+        oam sprite_data = oam_data[i];
+
+        // Todo: If sprite is on current scanline, add to oam_buffer and increment buffer index, up to max of 8 sprites. If more than 8 sprites are on current scanline, set sprite overflow flag in PPUSTATUS
+    }
+}
+
 void PPU::oam_dma(uint8_t *oam_buffer) {
     for(int i=0; i<OAM_BUFFER_SIZE; i++) {
         uint8_t data = oam_buffer[i];
@@ -187,4 +195,12 @@ void PPU::set_vblank() {
 void PPU::clear_vblank() {
     uint8_t ppustatus = get_register(PPUSTATUS);
     set_register(PPUSTATUS, ppustatus & 0x7f);
+}
+
+uint8_t PPU::read_address(uint16_t addr) {
+    if(addr < 0x3f00) {
+        return mapper->read(addr);
+    } else {
+        return 0; // Open bus behavior for addresses that are not handled
+    }
 }
