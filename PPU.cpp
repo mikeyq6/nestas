@@ -13,7 +13,8 @@ void PPU::init() {
         set_register(i, 0);
     }
     dot_counter = 0;
-    scanline_counter = 0;
+    current_scanline = 0;
+    sprite_counter = 0;
     for(int i=0; i<OAM_SIZE; i++) {
         oam_data[i] = {0, 0, 0, 0};
     }
@@ -114,16 +115,16 @@ void PPU::run_cpu_cycle(uint8_t cycles) {
     if(ppu_dots + dot_counter >= NUM_DOTS) {
         // End of scanline
         dot_counter = (dot_counter + ppu_dots) % NUM_DOTS;
-        scanline_counter++;
-        if(scanline_counter == VISIBLE_SCANLINES + 1 && dot_counter > 0) { 
+        current_scanline++;
+        if(current_scanline == VISIBLE_SCANLINES + 1 && dot_counter > 0) { 
             // Start of vblank
             set_vblank();
             // reset OAMADDR
             set_register(OAMADDR, 0);
-        } else if(scanline_counter > NUM_SCANLINES) {
+        } else if(current_scanline > NUM_SCANLINES) {
             // End of vblank, start of new frame
             clear_vblank();
-            scanline_counter = 0;
+            current_scanline = 0;
         }
     } else {
         dot_counter += ppu_dots;
@@ -151,11 +152,24 @@ void PPU::set_oam_data() {
 }
 
 void PPU::set_oam_buffer() {
-    for(int i=0; i<OAM_SIZE; i++) {
-        oam sprite_data = oam_data[i];
+    sprite_counter = 0;
 
-        // Todo: If sprite is on current scanline, add to oam_buffer and increment buffer index, up to max of 8 sprites. If more than 8 sprites are on current scanline, set sprite overflow flag in PPUSTATUS
+    for(int i=0; i<OAM_SIZE; i++) {
+        oam sprite = oam_data[i];
+
+        if(sprite_is_in_scanline(sprite)) {
+            if(sprite_counter < MAX_SPRITES) {
+                // Add sprite to buffer
+                oam_buffer[sprite_counter++] = sprite;
+            } else {
+                // TODO: Set sprite overflow flag and implement bug
+            }
+        }
     }
+}
+bool PPU::sprite_is_in_scanline(oam sprite) {
+    // case for 8x8 sprites, TODO: 8x16
+    return (sprite.y > current_scanline - 8 && sprite.y <= current_scanline);
 }
 
 void PPU::oam_dma(uint8_t *oam_buffer) {

@@ -48,15 +48,17 @@ private:
     uint8_t vram_increment;
 
     uint16_t dot_counter;
-    uint16_t scanline_counter;
+    uint16_t current_scanline;
 
     Mapper *mapper;
 
     Oam oam_data[OAM_SIZE];
+    uint8_t sprite_counter;
     Oam oam_buffer[MAX_SPRITES]; // Buffer for sprites on current scanline
 
     void set_oam_data();
     void set_oam_buffer();
+    bool sprite_is_in_scanline(oam sprite);
 
     SharedData *shared_data;
 
