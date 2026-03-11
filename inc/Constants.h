@@ -12,3 +12,5 @@ constexpr auto VISIBLE_SCANLINES = 240;
 constexpr auto OAM_SIZE = 64;
 constexpr auto OAM_BUFFER_SIZE = 256;
 constexpr auto MAX_SPRITES = 8;
+constexpr auto EXT_ADDRESS = 0x3f00;
+constexpr auto PALETTE_SIZE = 0x20;

@@ -50,6 +50,9 @@ private:
     uint16_t dot_counter;
     uint16_t current_scanline;
 
+    uint8_t ext_palette;
+    uint8_t palette_indexes[PALETTE_SIZE];
+
     Mapper *mapper;
 
     Oam oam_data[OAM_SIZE];

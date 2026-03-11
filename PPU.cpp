@@ -25,6 +25,7 @@ void PPU::init() {
     sprite_pattern_base_addr = 0; // Default to 8x8 sprites with pattern table 0
     background_base_addr = 0; // Default to pattern table 0 for background
     sprite_size = 0;
+    std::fill(palette_indexes, palette_indexes + PALETTE_SIZE, 0);
 }
 
 uint8_t PPU::get_register(uint8_t reg) {
@@ -106,6 +107,7 @@ void PPU::set_register(uint8_t reg, uint8_t value) {
 
 void PPU::run_cpu_cycle(uint8_t cycles) {
     uint16_t ppu_dots = cycles * 3;
+    ext_palette = read_address(EXT_ADDRESS);
 
     // TODO: Handle oamaddr bug when value > 8, see https://www.nesdev.org/wiki/PPU_registers#Values_during_rendering
 
@@ -215,6 +217,8 @@ void PPU::clear_vblank() {
 uint8_t PPU::read_address(uint16_t addr) {
     if(addr < 0x3f00) {
         return mapper->read(addr);
+    } else if(addr >= 0x3f00 && addr < 0x3f20) {
+        return palette_indexes[addr - 0x3f00];
     } else {
         return 0; // Open bus behavior for addresses that are not handled
     }
