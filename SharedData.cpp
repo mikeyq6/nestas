@@ -2,7 +2,7 @@
 
 SharedData::SharedData() {
     is_running = true;
-    std::fill(pixels, pixels + NUM_PIXELS, 0);
+    std::fill(pixel_buffer, pixel_buffer + NUM_PIXELS, 0);
 }
 SharedData::~SharedData() {
 
@@ -37,4 +37,15 @@ void SharedData::set_apu_io_register(uint16_t addr, uint8_t value) {
     const lock_guard<mutex> lock{apu_io_register_mutex};
 
     apu_io_registers[addr & 0x7] = value;
+}
+
+void SharedData::copy_pixels_from(uint8_t *buffer) {
+    const lock_guard<mutex> lock{pixel_buffer_mutex};
+
+    std::copy(buffer, buffer + NUM_PIXELS, pixel_buffer);
+}
+void SharedData::copy_pixels_to(uint8_t *buffer) {
+    const lock_guard<mutex> lock{pixel_buffer_mutex};
+
+    std::copy(pixel_buffer, pixel_buffer + NUM_PIXELS, buffer);
 }
