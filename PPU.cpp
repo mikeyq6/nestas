@@ -112,7 +112,8 @@ void PPU::run_cpu_cycle(uint8_t cycles) {
 
     // TODO: Handle oamaddr bug when value > 8, see https://www.nesdev.org/wiki/PPU_registers#Values_during_rendering
 
-    if(is_rendering_enabled()) {
+    if(is_rendering_enabled()) { // TODO: Handle case where the scanline is updated within this method,
+                                 // may need to split the set_pixels_for method for when scanline increments in the middle
         set_pixels_for(ppu_dots);
     }
     if(ppu_dots + dot_counter >= NUM_DOTS) {
@@ -128,10 +129,7 @@ void PPU::run_cpu_cycle(uint8_t cycles) {
             // End of vblank, start of new frame
             clear_vblank();
             current_scanline = 0;
-        } else {
-            set_oam_buffer();
-            set_background_tiles_for_scanline();
-        }
+        } 
     } else {
         dot_counter += ppu_dots;
     }
@@ -211,7 +209,12 @@ void PPU::oam_dma(uint8_t *oam_buffer) {
 }
 
 void PPU::set_pixels_for(uint16_t num_dots) {
-    // TODO
+    if(current_scanline < VISIBLE_SCANLINES) {
+        set_oam_buffer();
+        set_background_tiles_for_scanline();
+    } else {
+        // TODO: Anything to do here??
+    }
 }
 
 bool PPU::is_rendering_enabled() {
