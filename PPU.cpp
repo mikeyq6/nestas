@@ -26,6 +26,7 @@ void PPU::init() {
     background_base_addr = 0; // Default to pattern table 0 for background
     sprite_size = 0;
     std::fill(palette_indexes, palette_indexes + PALETTE_SIZE, 0);
+    std::fill(background_for_scanline, background_for_scanline + TILES_IN_SCANLINE, 0);
 }
 
 uint8_t PPU::get_register(uint8_t reg) {
@@ -127,6 +128,9 @@ void PPU::run_cpu_cycle(uint8_t cycles) {
             // End of vblank, start of new frame
             clear_vblank();
             current_scanline = 0;
+        } else {
+            set_oam_buffer();
+            set_background_tiles_for_scanline();
         }
     } else {
         dot_counter += ppu_dots;
@@ -167,6 +171,16 @@ void PPU::set_oam_buffer() {
                 // TODO: Set sprite overflow flag and implement bug
             }
         }
+    }
+}
+
+void PPU::set_background_tiles_for_scanline() {
+    // Offset for nametable access
+    uint16_t nametable_addr = 0x2000; // TODO: This can be different
+    uint8_t scanline_offset = current_scanline / 8;
+    uint16_t nametable_offset = nametable_addr + (scanline_offset * TILES_IN_SCANLINE);
+    for(int i=0; i<TILES_IN_SCANLINE; i++) {
+        background_for_scanline[i] = read_address(nametable_offset + i);
     }
 }
 
