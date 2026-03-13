@@ -32,11 +32,16 @@ public:
     void copy_pixels_from(uint8_t *buffer);
     void copy_pixels_to(uint8_t *buffer);
 
+    void copy_tile_map_pixels_from(uint8_t *buffer);
+    void copy_tile_map_pixels_to(uint8_t *buffer);
+
 private:
 	mutex is_running_mutex;
     mutex apu_io_register_mutex;
     mutex pixel_buffer_mutex;
+    mutex tile_map_pixels_mutex;
 
     uint8_t pixel_buffer[NUM_PIXELS];
+    uint8_t tile_map_pixel_buffer[TILE_MAP_PIXELS];
     uint8_t apu_io_registers[0x20];
 };

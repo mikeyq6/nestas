@@ -4,6 +4,7 @@ SharedData::SharedData() {
     is_running = true;
     show_tile_map = true;
     std::fill(pixel_buffer, pixel_buffer + NUM_PIXELS, 0);
+    std::fill(tile_map_pixel_buffer, tile_map_pixel_buffer + TILE_MAP_DATA_SIZE, 0);
 }
 SharedData::~SharedData() {
 
@@ -60,4 +61,15 @@ void SharedData::copy_pixels_to(uint8_t *buffer) {
     const lock_guard<mutex> lock{pixel_buffer_mutex};
 
     std::copy(pixel_buffer, pixel_buffer + NUM_PIXELS, buffer);
+}
+
+void SharedData::copy_tile_map_pixels_from(uint8_t *buffer) {
+    const lock_guard<mutex> lock{tile_map_pixels_mutex};
+
+    std::copy(buffer, buffer + TILE_MAP_DATA_SIZE, tile_map_pixel_buffer);
+}
+void SharedData::copy_tile_map_pixels_to(uint8_t *buffer) {
+    const lock_guard<mutex> lock{tile_map_pixels_mutex};
+
+    std::copy(tile_map_pixel_buffer, tile_map_pixel_buffer + TILE_MAP_DATA_SIZE, buffer);
 }
