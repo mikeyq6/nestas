@@ -59,6 +59,7 @@ private:
     uint8_t sprite_counter;
     Oam oam_buffer[MAX_SPRITES]; // Buffer for sprites on current scanline
     uint8_t background_for_scanline[TILES_IN_SCANLINE]; // Buffer for background tiles on current scanline
+    uint8_t tile_map_pixels_buffer[TILE_MAP_DATA_SIZE];
 
     void set_oam_data();
     void set_oam_buffer();
@@ -74,5 +75,5 @@ private:
 
     uint8_t read_address(uint16_t addr);
 
-
+    void set_tile_map_data();
 };

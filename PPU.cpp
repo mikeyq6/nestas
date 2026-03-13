@@ -27,6 +27,7 @@ void PPU::init() {
     sprite_size = 0;
     std::fill(palette_indexes, palette_indexes + PALETTE_SIZE, 0);
     std::fill(background_for_scanline, background_for_scanline + TILES_IN_SCANLINE, 0);
+    std::fill(tile_map_pixels_buffer, tile_map_pixels_buffer + TILE_MAP_DATA_SIZE, 0);
 }
 
 uint8_t PPU::get_register(uint8_t reg) {
@@ -125,6 +126,11 @@ void PPU::run_cpu_cycle(uint8_t cycles) {
             set_vblank();
             // reset OAMADDR
             set_register(OAMADDR, 0);
+
+            if(shared_data->get_show_tile_map()) {
+                set_tile_map_data();
+                shared_data->copy_tile_map_pixels_from(tile_map_pixels_buffer);
+            }
         } else if(current_scanline > NUM_SCANLINES) {
             // End of vblank, start of new frame
             clear_vblank();
@@ -238,5 +244,11 @@ uint8_t PPU::read_address(uint16_t addr) {
         return palette_indexes[addr - 0x3f00];
     } else {
         return 0; // Open bus behavior for addresses that are not handled
+    }
+}
+
+void PPU::set_tile_map_data() {
+    for(int i=0; i<TILE_MAP_DATA_SIZE; i++) {
+        tile_map_pixels_buffer[i] = read_address(i);
     }
 }
