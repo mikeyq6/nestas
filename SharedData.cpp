@@ -2,6 +2,7 @@
 
 SharedData::SharedData() {
     is_running = true;
+    show_tile_map = true;
     std::fill(pixel_buffer, pixel_buffer + NUM_PIXELS, 0);
 }
 SharedData::~SharedData() {
@@ -17,6 +18,17 @@ void SharedData::set_is_running(bool value) {
     const lock_guard<mutex> lock{is_running_mutex};
 
     is_running = value;
+}
+
+bool SharedData::get_show_tile_map() {
+    const lock_guard<mutex> lock(tile_map_pixels_mutex);
+
+    return show_tile_map;
+}
+void SharedData::set_show_tile_map(bool value) {
+    const lock_guard<mutex> lock(tile_map_pixels_mutex);
+
+    show_tile_map = value;
 }
 
 uint16_t SharedData::get_random(uint16_t max) {

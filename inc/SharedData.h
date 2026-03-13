@@ -16,10 +16,13 @@ public:
     SharedData();
     ~SharedData();
 
-    bool is_running;
+    bool is_running, show_tile_map;
 
     bool get_is_running();
     void set_is_running(bool value);
+
+    bool get_show_tile_map();
+    void set_show_tile_map(bool value);
 
     uint16_t get_random(uint16_t max);
 
