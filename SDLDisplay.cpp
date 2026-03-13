@@ -19,7 +19,7 @@ SDLDisplay::SDLDisplay(SharedData *shared_data) : Display(shared_data) {
 
 	tile_map_window = SDL_CreateWindow("CHR Viewer",
 		100, 100, TILE_MAP_WIDTH * zoom, TILE_MAP_HEIGHT * zoom,
-		SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | flags);
+		SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN | flags);
 	tile_map_renderer = SDL_CreateRenderer(tile_map_window, -1, 0);
 	tile_map_texture = SDL_CreateTexture(tile_map_renderer,
 		SDL_PIXELFORMAT_RGB888,

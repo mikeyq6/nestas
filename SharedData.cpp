@@ -2,7 +2,7 @@
 
 SharedData::SharedData() {
     is_running = true;
-    show_tile_map = true;
+    show_tile_map = false;
     std::fill(pixel_buffer, pixel_buffer + NUM_PIXELS, 0);
     std::fill(tile_map_pixel_buffer, tile_map_pixel_buffer + TILE_MAP_DATA_SIZE, 0);
 }
