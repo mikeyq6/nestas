@@ -17,13 +17,14 @@ public:
 
     void draw() override;
     void init() override;
+    void set_tile_map_pixels() override;
 
 private:
     bool quit;
     int xpos, ypos, flags, zoom;
-	SDL_Window* window;
-	SDL_Renderer* renderer;
-	SDL_Texture* texture;
+	SDL_Window *window, *tile_map_window;
+	SDL_Renderer *renderer, *tile_map_renderer;
+	SDL_Texture *texture, *tile_map_texture;
 
     constexpr static uint32_t PALETTE_COLOURS[0x40] = { // Array of colours to map from Hue/Lumnance values to SDL colours
         0x00626262, 0x00042393, 0x001b17a9, 0x0042129b, 0x00600a6a, 0x006d0326, 0x00640705, 0x00481e04, 
@@ -37,4 +38,6 @@ private:
     };
 
     void process_key_event(SDL_Event* event);
+    void get_tile_data(uint8_t *tile, uint8_t *tile_map_data, uint8_t tile_number);
+    
 };
