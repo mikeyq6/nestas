@@ -138,7 +138,7 @@ void SDLDisplay::set_tile_map_pixels() {
 		for(int j=0; j<0x8; j++) {
 			for(int k=0; k<0x8; k++) {
 				tile_index = (j * 0x8) + k;
-				tile_map_pixels[pixel_index + k] = PALETTE_COLOURS[tile_data[tile_index] * 0x10 + tile_map_palette_cycle];
+				tile_map_pixels[pixel_index + k] = TILE_MAP_PALETTE_COLOURS[tile_data[tile_index] * 0x10 + tile_map_palette_cycle];
 			}
 			pixel_index += TILE_MAP_WIDTH;
 		}
