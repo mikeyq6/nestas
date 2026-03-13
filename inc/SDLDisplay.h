@@ -21,7 +21,7 @@ public:
 
 private:
     bool quit;
-    int xpos, ypos, flags, zoom;
+    int xpos, ypos, flags, zoom, tile_map_palette_cycle;
 	SDL_Window *window, *tile_map_window;
 	SDL_Renderer *renderer, *tile_map_renderer;
 	SDL_Texture *texture, *tile_map_texture;

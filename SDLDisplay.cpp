@@ -6,6 +6,7 @@ SDLDisplay::SDLDisplay(SharedData *shared_data) : Display(shared_data) {
     ypos = 300;
     flags = 0;
 	zoom = 2;
+	tile_map_palette_cycle = 0;
 
     SDL_Init(SDL_INIT_EVERYTHING);
 	window = SDL_CreateWindow(title, 
@@ -88,14 +89,16 @@ void SDLDisplay::draw() {
 
 
 void SDLDisplay::process_key_event(SDL_Event* event) {
+	bool show = false;
 
 	if (event->type == SDL_KEYDOWN) {
+
 		switch (event->key.keysym.sym) {
 			case SDLK_ESCAPE:
 				quit = true;
 				break;
 			case SDLK_t:
-				bool show = shared_data->get_show_tile_map();
+				show = shared_data->get_show_tile_map();
 				if(!show) {
 					SDL_ShowWindow(tile_map_window);
 				} else {
@@ -103,6 +106,13 @@ void SDLDisplay::process_key_event(SDL_Event* event) {
 				}
 				shared_data->set_show_tile_map(!show);
 				break;
+			case SDLK_p:
+				tile_map_palette_cycle = (tile_map_palette_cycle + 1) % 0x10;
+				break;
+
+			// case SDLK_p:
+			// 	palette_cycle = (palette_cycle + 1) % 0x10;
+			// 	break;
 			// case SDLK_v:
 			// 	sdata->set_key_down_flag(0xf);
 			// 	break;
@@ -128,7 +138,7 @@ void SDLDisplay::set_tile_map_pixels() {
 		for(int j=0; j<0x8; j++) {
 			for(int k=0; k<0x8; k++) {
 				tile_index = (j * 0x8) + k;
-				tile_map_pixels[pixel_index + k] = PALETTE_COLOURS[tile_data[tile_index] * 0x10];
+				tile_map_pixels[pixel_index + k] = PALETTE_COLOURS[tile_data[tile_index] * 0x10 + tile_map_palette_cycle];
 			}
 			pixel_index += TILE_MAP_WIDTH;
 		}
