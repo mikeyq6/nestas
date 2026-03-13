@@ -77,7 +77,6 @@ void SDLDisplay::draw() {
 			SDL_RenderClear(tile_map_renderer);
 			SDL_RenderCopy(tile_map_renderer, tile_map_texture, NULL, NULL);
 			SDL_RenderPresent(tile_map_renderer);
-			// shared_data->set_show_tile_map(false);
 		}
 		
 		std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_DISPLAY_MS));
@@ -139,12 +138,13 @@ void SDLDisplay::set_tile_map_pixels() {
 void SDLDisplay::get_tile_data(uint8_t *tile, uint8_t *tile_map_data, uint8_t tile_number) {
 	uint16_t index = tile_number * 0x10;
 	uint8_t r1, r2, bit1, bit2, tile_index = 0;
+	int i;
 	for(int j=0; j<0x8; j++) {
 		tile_index = j * 0x8;
 
-		r1 = tile_map_data[index];
-		r2 = tile_map_data[index + 0x8];
-		for(int i=7; i>=0; i--) {
+		r1 = tile_map_data[index + j];
+		r2 = tile_map_data[index + j + 0x8];
+		for(i=7; i>=0; i--) {
 			bit1 = (r1 >> i) & 0x1;
 			bit2 = (r2 >> i) & 0x1;
 			tile[tile_index + (7 - i)] = (bit2 << 1) | bit1;

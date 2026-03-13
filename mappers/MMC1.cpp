@@ -7,8 +7,10 @@ MMC1::~MMC1() {}
 uint8_t MMC1::read(uint16_t addr) {
     if(addr < 0x1000) {
         // TODO: Implement switchable CHR bank
+        return chr_rom[addr];
     } else if(addr >= 0x1000 && addr < 0x2000) {
         // TODO: Implement switchable CHR bank
+        return chr_rom[addr];
     } else if(addr >= 0x6000 && addr < 0x8000) {
         // TODO: Implement RAM banking
     } else if(addr >= 0x8000 && addr < 0xc000) {
