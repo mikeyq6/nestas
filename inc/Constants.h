@@ -4,6 +4,7 @@
 constexpr auto MEMORY_SIZE = 0x800;
 
 // PPU Constants
+constexpr auto VRAM_SIZE = 0x800;
 constexpr auto NUM_DOTS = 341;
 constexpr auto NUM_SCANLINES = 262;
 constexpr auto VISIBLE_SCANLINES = 240;

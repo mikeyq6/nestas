@@ -28,6 +28,7 @@ void PPU::init() {
     std::fill(palette_indexes, palette_indexes + PALETTE_SIZE, 0);
     std::fill(background_for_scanline, background_for_scanline + TILES_IN_SCANLINE, 0);
     std::fill(tile_map_pixels_buffer, tile_map_pixels_buffer + TILE_MAP_DATA_SIZE, 0);
+    std::fill(vram, vram + VRAM_SIZE, 0);
 }
 
 uint8_t PPU::get_register(uint8_t reg) {

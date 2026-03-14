@@ -42,6 +42,7 @@ public:
 private:
 
     uint8_t registers[8];
+    uint8_t vram[VRAM_SIZE];
     uint8_t w, sprite_size, vblank_enable;
     uint16_t x_scroll, y_scroll, ppu_addr, base_nametable_addr, sprite_pattern_base_addr, 
         background_base_addr;
