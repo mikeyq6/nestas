@@ -32,6 +32,17 @@ void SharedData::set_show_tile_map(bool value) {
     show_tile_map = value;
 }
 
+bool SharedData::get_show_nametables() {
+    const lock_guard<mutex> lock(nametables_mutex);
+
+    return show_nametables;
+}
+void SharedData::set_show_nametables(bool value) {
+    const lock_guard<mutex> lock(nametables_mutex);
+
+    show_nametables = value;
+}
+
 uint16_t SharedData::get_random(uint16_t max) {
     // Init random number generator
     std::random_device os_seed;

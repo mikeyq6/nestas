@@ -16,13 +16,16 @@ public:
     SharedData();
     ~SharedData();
 
-    bool is_running, show_tile_map;
+    bool is_running, show_tile_map, show_nametables;
 
     bool get_is_running();
     void set_is_running(bool value);
 
     bool get_show_tile_map();
     void set_show_tile_map(bool value);
+
+    bool get_show_nametables();
+    void set_show_nametables(bool value);
 
     uint16_t get_random(uint16_t max);
 
@@ -40,6 +43,7 @@ private:
     mutex apu_io_register_mutex;
     mutex pixel_buffer_mutex;
     mutex tile_map_pixels_mutex;
+    mutex nametables_mutex;
 
     uint8_t pixel_buffer[NUM_PIXELS];
     uint8_t tile_map_pixel_buffer[TILE_MAP_PIXELS];
