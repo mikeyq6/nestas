@@ -26,12 +26,23 @@ SDLDisplay::SDLDisplay(SharedData *shared_data) : Display(shared_data) {
 		SDL_PIXELFORMAT_RGB888,
 		SDL_TEXTUREACCESS_STREAMING,
 		TILE_MAP_WIDTH, TILE_MAP_HEIGHT);
+
+	nametable_map_window = SDL_CreateWindow("Nametables Viewer",
+		500, 500, NAMETABLE_MAP_WIDTH * zoom, NAMETABLE_MAP_HEIGHT * zoom,
+		SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN | flags);
+	nametable_map_renderer = SDL_CreateRenderer(nametable_map_window, -1, 0);
+	nametable_map_texture = SDL_CreateTexture(nametable_map_renderer,
+		SDL_PIXELFORMAT_RGB888,
+		SDL_TEXTUREACCESS_STREAMING,
+		NAMETABLE_MAP_WIDTH, NAMETABLE_MAP_HEIGHT);
 }
 SDLDisplay::~SDLDisplay() {
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyRenderer(tile_map_renderer);
+	SDL_DestroyRenderer(nametable_map_renderer);
 	SDL_DestroyTexture(texture);
 	SDL_DestroyTexture(tile_map_texture);
+	SDL_DestroyTexture(nametable_map_texture);
 }
 
 void SDLDisplay::init() {
@@ -79,6 +90,15 @@ void SDLDisplay::draw() {
 			SDL_RenderCopy(tile_map_renderer, tile_map_texture, NULL, NULL);
 			SDL_RenderPresent(tile_map_renderer);
 		}
+
+		if(shared_data->get_show_nametables()) {
+			shared_data->copy_nametable_map_pixels_to(nametable_data);
+			set_nametable_map_pixels();
+			SDL_UpdateTexture(nametable_map_texture, NULL, nametable_map_pixels, NAMETABLE_MAP_WIDTH * sizeof(uint32_t));
+			SDL_RenderClear(nametable_map_renderer);
+			SDL_RenderCopy(nametable_map_renderer, nametable_map_texture, NULL, NULL);
+			SDL_RenderPresent(nametable_map_renderer);
+		}
 		
 		std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_DISPLAY_MS));
     }
@@ -109,6 +129,16 @@ void SDLDisplay::process_key_event(SDL_Event* event) {
 			case SDLK_p:
 				tile_map_palette_cycle = (tile_map_palette_cycle + 1) % 0x10;
 				break;
+			case SDLK_n:
+				show = shared_data->get_show_nametables();
+				if(!show) {
+					SDL_ShowWindow(nametable_map_window);
+				} else {
+					SDL_HideWindow(nametable_map_window);
+				}
+				shared_data->set_show_nametables(!show);
+				break;
+
 
 			// case SDLK_p:
 			// 	palette_cycle = (palette_cycle + 1) % 0x10;
@@ -143,6 +173,10 @@ void SDLDisplay::set_tile_map_pixels() {
 			pixel_index += TILE_MAP_WIDTH;
 		}
 	}
+}
+
+void SDLDisplay::set_nametable_map_pixels() {
+	// TODO:
 }
 
 void SDLDisplay::get_tile_data(uint8_t *tile, uint8_t *tile_map_data, uint8_t tile_number) {

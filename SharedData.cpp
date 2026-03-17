@@ -84,3 +84,15 @@ void SharedData::copy_tile_map_pixels_to(uint8_t *buffer) {
 
     std::copy(tile_map_pixel_buffer, tile_map_pixel_buffer + TILE_MAP_DATA_SIZE, buffer);
 }
+
+void SharedData::copy_nametable_map_pixels_from(uint8_t *buffer) {
+    const lock_guard<mutex> lock{nametables_mutex};
+
+    std::copy(buffer, buffer + NAMETABLE_MAP_PIXELS, nametables_map_pixel_buffer);
+
+}
+void SharedData::copy_nametable_map_pixels_to(uint8_t *buffer) {
+    const lock_guard<mutex> lock{nametables_mutex};
+
+    std::copy(nametables_map_pixel_buffer, nametables_map_pixel_buffer + NAMETABLE_MAP_PIXELS, buffer);
+}

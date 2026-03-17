@@ -25,3 +25,6 @@ constexpr auto TILE_MAP_DATA_SIZE = 0x2000;
 constexpr auto TILE_MAP_WIDTH = 0x100;
 constexpr auto TILE_MAP_HEIGHT = 0x80;
 constexpr auto TILE_MAP_PIXELS = TILE_MAP_WIDTH * TILE_MAP_HEIGHT;
+constexpr auto NAMETABLE_MAP_WIDTH = 0x100;
+constexpr auto NAMETABLE_MAP_HEIGHT = 0xf0;
+constexpr auto NAMETABLE_MAP_PIXELS = NAMETABLE_MAP_WIDTH * NAMETABLE_MAP_HEIGHT;

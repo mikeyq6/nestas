@@ -18,13 +18,14 @@ public:
     void draw() override;
     void init() override;
     void set_tile_map_pixels() override;
+    void set_nametable_map_pixels() override;
 
 private:
     bool quit;
     int xpos, ypos, flags, zoom, tile_map_palette_cycle;
-	SDL_Window *window, *tile_map_window;
-	SDL_Renderer *renderer, *tile_map_renderer;
-	SDL_Texture *texture, *tile_map_texture;
+	SDL_Window *window, *tile_map_window, *nametable_map_window;
+	SDL_Renderer *renderer, *tile_map_renderer, *nametable_map_renderer;
+	SDL_Texture *texture, *tile_map_texture, *nametable_map_texture;
 
     constexpr static uint32_t TILE_MAP_PALETTE_COLOURS[0x40] = {
         0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 

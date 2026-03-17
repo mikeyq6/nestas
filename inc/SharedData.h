@@ -38,6 +38,9 @@ public:
     void copy_tile_map_pixels_from(uint8_t *buffer);
     void copy_tile_map_pixels_to(uint8_t *buffer);
 
+    void copy_nametable_map_pixels_from(uint8_t *buffer);
+    void copy_nametable_map_pixels_to(uint8_t *buffer);
+
 private:
 	mutex is_running_mutex;
     mutex apu_io_register_mutex;
@@ -47,5 +50,6 @@ private:
 
     uint8_t pixel_buffer[NUM_PIXELS];
     uint8_t tile_map_pixel_buffer[TILE_MAP_PIXELS];
+    uint8_t nametables_map_pixel_buffer[NAMETABLE_MAP_PIXELS];
     uint8_t apu_io_registers[0x20];
 };
