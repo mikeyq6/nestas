@@ -27,6 +27,7 @@ constexpr auto TILE_MAP_WIDTH = 0x100;
 constexpr auto TILE_MAP_HEIGHT = 0x80;
 constexpr auto TILE_MAP_PIXELS = TILE_MAP_WIDTH * TILE_MAP_HEIGHT;
 constexpr auto NUM_NAMETABLE_TILES = 0xf00;
+constexpr auto NUM_INDIVIDUAL_NAMETABLE_TILES = NUM_NAMETABLE_TILES / 4;
 constexpr auto NUM_NAMETABLE_TILES_PER_ROW = 0x40;
 constexpr auto NAMETABLE_MAP_WIDTH = 0x200;
 constexpr auto NAMETABLE_MAP_HEIGHT = 0x1e0;

@@ -28,6 +28,7 @@ void PPU::init() {
     std::fill(palette_indexes, palette_indexes + PALETTE_SIZE, 0);
     std::fill(background_for_scanline, background_for_scanline + TILES_IN_SCANLINE, 0);
     std::fill(tile_map_pixels_buffer, tile_map_pixels_buffer + TILE_MAP_DATA_SIZE, 0);
+    std::fill(nametable_pixels_buffer, nametable_pixels_buffer + NUM_NAMETABLE_TILES, 0);    
     std::fill(vram, vram + VRAM_SIZE, 0);
 }
 
@@ -131,6 +132,10 @@ void PPU::run_cpu_cycle(uint8_t cycles) {
             if(shared_data->get_show_tile_map()) {
                 set_tile_map_data();
                 shared_data->copy_tile_map_pixels_from(tile_map_pixels_buffer);
+            }
+            if(shared_data->get_show_nametables()) {
+                set_nametable_data();
+                shared_data->copy_nametable_map_pixels_from(nametable_pixels_buffer);
             }
         } else if(current_scanline > NUM_SCANLINES) {
             // End of vblank, start of new frame
@@ -239,7 +244,9 @@ void PPU::clear_vblank() {
 }
 
 uint8_t PPU::read_address(uint16_t addr) {
-    if(addr < 0x3f00) {
+    if(addr >= 0x2000 && addr < 0x3f00) {
+        return vram[addr % VRAM_SIZE];
+    } else if(addr < 0x3f00) {
         return mapper->read(addr);
     } else if(addr >= 0x3f00 && addr < 0x3f20) {
         return palette_indexes[addr - 0x3f00];
@@ -251,5 +258,18 @@ uint8_t PPU::read_address(uint16_t addr) {
 void PPU::set_tile_map_data() {
     for(int i=0; i<TILE_MAP_DATA_SIZE; i++) {
         tile_map_pixels_buffer[i] = read_address(i);
+    }
+}
+
+void PPU::set_nametable_data() {
+    uint32_t base_addr = 0x2000;
+    uint32_t nametable_index = 0;
+    for(int i=0; i<4; i++) {
+        nametable_index = i * NUM_INDIVIDUAL_NAMETABLE_TILES;
+        // Todo: handle horizontal and vertical mirroring, for now just read from nametables
+        base_addr = 0x2000 + nametable_index;
+        for(int j=0; j<NUM_INDIVIDUAL_NAMETABLE_TILES; j++) {
+            tile_map_pixels_buffer[nametable_index + j] = read_address(base_addr + j);
+        }
     }
 }
