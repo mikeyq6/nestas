@@ -18,6 +18,6 @@ protected:
     uint32_t pixels[NUM_PIXELS];
     uint8_t tile_map_data[TILE_MAP_PIXELS];
     uint32_t tile_map_pixels[TILE_MAP_PIXELS];
-    uint8_t nametable_data[4 * 30 * 32];
+    uint8_t nametable_data[NUM_NAMETABLE_TILES];
     uint32_t nametable_map_pixels[NAMETABLE_MAP_PIXELS];
 };

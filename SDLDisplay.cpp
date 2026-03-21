@@ -1,5 +1,8 @@
 #include "inc/SDLDisplay.h"
 
+// #include <vector>
+// #include <iostream>
+
 SDLDisplay::SDLDisplay(SharedData *shared_data) : Display(shared_data) {
     const char *title = "NesTas";
     xpos = 300;
@@ -49,6 +52,8 @@ void SDLDisplay::init() {
     fill(pixels, pixels + NUM_PIXELS, 0);
 	fill(tile_map_pixels, tile_map_pixels + TILE_MAP_PIXELS, 0);
 	fill(tile_map_data, tile_map_data + TILE_MAP_PIXELS, 0);
+	fill(nametable_map_pixels, nametable_map_pixels + NAMETABLE_MAP_PIXELS, 0);
+	fill(nametable_data, nametable_data + NUM_NAMETABLE_TILES, 0);
 }
 
 void SDLDisplay::draw() {
@@ -162,7 +167,7 @@ void SDLDisplay::set_tile_map_pixels() {
 	uint8_t tile_data[64];
 
 	for(int i=0; i<NUM_TILE_MAP_TILES; i++) { // for each tile (16 bytes)
-		pixel_index = ((i / 0x20) * TILE_MAP_WIDTH * 8) + ((i % 0x20) * 0x8);
+		pixel_index = ((i / NUM_TILE_MAP_TILES_PER_ROW) * TILE_MAP_WIDTH * 8) + ((i % NUM_TILE_MAP_TILES_PER_ROW) * 0x8);
 		get_tile_data(tile_data, tile_map_data, i);
 
 		for(int j=0; j<0x8; j++) {
@@ -176,7 +181,28 @@ void SDLDisplay::set_tile_map_pixels() {
 }
 
 void SDLDisplay::set_nametable_map_pixels() {
-	// TODO:
+	uint32_t tile_index = 0, pixel_index = 0;
+	uint8_t tile_data[64];
+	// std::vector<int> indexes = {};
+
+	for(int i=0; i<NUM_NAMETABLE_TILES; i++) { // for each tile (16 bytes)
+		pixel_index = ((i / NUM_NAMETABLE_TILES_PER_ROW) * NAMETABLE_MAP_WIDTH * 0x8) + ((i % NUM_NAMETABLE_TILES_PER_ROW) * 0x8);
+		get_tile_data(tile_data, nametable_data, i);
+
+		for(int j=0; j<0x8; j++) {
+			for(int k=0; k<0x8; k++) {
+				tile_index = (j * 0x8) + k;
+				nametable_map_pixels[pixel_index + k] = TILE_MAP_PALETTE_COLOURS[tile_data[tile_index] * 0x10];
+				// indexes.push_back(pixel_index + k);
+			}
+			pixel_index += NAMETABLE_MAP_WIDTH;
+		}
+	}
+
+	// std::sort(indexes.begin(), indexes.end());
+	// for(int i=0; i<indexes.size(); i++) {
+	// 	std::cout << indexes[i] << ", ";
+	// }
 }
 
 void SDLDisplay::get_tile_data(uint8_t *tile, uint8_t *tile_map_data, uint8_t tile_number) {
