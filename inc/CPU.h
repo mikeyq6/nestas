@@ -45,6 +45,8 @@ private:
     uint8_t a, x, y, p, s;
     uint16_t pc;
 
+    bool irq_pending;
+
     SharedData *shared_data;
     Mapper *mapper;
     PPU *ppu;
@@ -56,6 +58,7 @@ private:
     void reset_flag(FLAG flag);
     bool is_set(FLAG flag);
 
+    void set_interrupt_line(uint8_t line);
     void check_interrupts();
 
     void get_next_instruction(uint8_t *inst);

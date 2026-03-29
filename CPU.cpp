@@ -17,6 +17,7 @@ CPU::~CPU() {
 
 void CPU::init() {
     s = 0xfd;
+    irq_pending = false;
 
     std::fill(memory, memory + MEMORY_SIZE, 0);
 
@@ -44,8 +45,10 @@ void CPU::run() {
         // Kick off PPU cycles
         ppu->run_cpu_cycle(inst.cycles);
 
-        // check interrupts
-        check_interrupts();
+        // check interrupts if enabled
+        if(!is_set(I)) {
+            check_interrupts();
+        }
     }
 }
 
@@ -1034,6 +1037,19 @@ void CPU::SBC(uint8_t value) {
     a = diff & 0xff;
 }
 
-void CPU::check_interrupts() {
 
+void CPU::set_interrupt_line(uint8_t line) {
+    irq_pending = true; // TODO: Just set to true for now, figure out how the line works later
+}
+
+void CPU::check_interrupts() {
+    if(irq_pending) {
+        push((pc >> 8) & 0xff); // push high byte of PC
+        push(pc & 0xff);        // push low byte of PC
+        push(p);                // push processor status
+
+        // Get the new PC
+        pc = (read_memory(0xffff) << 8) | read_memory(0xfffe);
+        irq_pending = false;
+    }
 }
