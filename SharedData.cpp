@@ -96,3 +96,17 @@ void SharedData::copy_nametable_map_pixels_to(uint8_t *buffer) {
 
     std::copy(nametables_map_pixel_buffer, nametables_map_pixel_buffer + NAMETABLE_MAP_PIXELS, buffer);
 }
+
+bool SharedData::get_nmi_pending() {
+    return nmi_pending;
+}
+void SharedData::set_nmi_pending(bool value) {
+    nmi_pending = value;
+}
+
+bool SharedData::get_irq_pending() {
+    return irq_pending;
+}
+void SharedData::set_irq_line(uint8_t line) {
+    irq_pending = true;
+}

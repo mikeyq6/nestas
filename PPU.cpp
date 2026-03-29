@@ -126,6 +126,12 @@ void PPU::run_cpu_cycle(uint8_t cycles) {
         if(current_scanline == VISIBLE_SCANLINES + 1 && dot_counter > 0) { 
             // Start of vblank
             set_vblank();
+            
+            // set interrupt if enabled
+            if(vblank_enable) {
+                shared_data->set_nmi_pending(true);
+            }
+            
             // reset OAMADDR
             set_register(OAMADDR, 0);
 

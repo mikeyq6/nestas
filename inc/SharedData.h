@@ -27,6 +27,12 @@ public:
     bool get_show_nametables();
     void set_show_nametables(bool value);
 
+    bool get_nmi_pending();
+    void set_nmi_pending(bool value);
+
+    bool get_irq_pending();
+    void set_irq_line(uint8_t line);
+
     uint16_t get_random(uint16_t max);
 
     uint8_t get_apu_io_register(uint16_t addr);
@@ -52,4 +58,6 @@ private:
     uint8_t tile_map_pixel_buffer[TILE_MAP_PIXELS];
     uint8_t nametables_map_pixel_buffer[NAMETABLE_MAP_PIXELS];
     uint8_t apu_io_registers[0x20];
+
+    bool nmi_pending, irq_pending;
 };
