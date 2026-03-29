@@ -36,6 +36,7 @@ uint8_t PPU::get_register(uint8_t reg) {
     switch(reg) {
         case PPUSTATUS: 
             return registers[PPUSTATUS] & 0xe0; // Only bits 7-5 are readable
+            registers[PPUSTATUS] &= 0x7f; // Clear vblank flag after read
             break;
         case PPUMASK:
         case PPUCTRL:
@@ -241,12 +242,12 @@ bool PPU::is_rendering_enabled() {
 }
 
 void PPU::set_vblank() {
-    uint8_t ppustatus = registers[PPUSTATUS];
-    registers[PPUSTATUS] = ppustatus | 0x80;
+    uint8_t ppustatus = get_register(PPUSTATUS);
+    set_register(PPUSTATUS, ppustatus | 0x80);
 }
 void PPU::clear_vblank() {
-    uint8_t ppustatus = registers[PPUSTATUS];
-    registers[PPUSTATUS] = ppustatus & 0x7f;
+    uint8_t ppustatus = get_register(PPUSTATUS);
+    set_register(PPUSTATUS, ppustatus & 0x7f);
 }
 
 uint8_t PPU::read_address(uint16_t addr) {
