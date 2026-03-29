@@ -131,9 +131,9 @@ void PPU::run_cpu_cycle(uint8_t cycles) {
             if(vblank_enable) {
                 shared_data->set_nmi_pending(true);
             }
-            
+
             // reset OAMADDR
-            set_register(OAMADDR, 0);
+            registers[OAMADDR] = 0;
 
             if(shared_data->get_show_tile_map()) {
                 set_tile_map_data();
@@ -154,8 +154,8 @@ void PPU::run_cpu_cycle(uint8_t cycles) {
 }
 
 void PPU::set_oam_data() {
-    uint8_t data = get_register(OAMDATA);
-    uint8_t oamaddr = get_register(OAMADDR);
+    uint8_t data = registers[OAMDATA];
+    uint8_t oamaddr = registers[OAMADDR];
     uint8_t index = oamaddr / 4;
     switch(oamaddr % 4) {
         case 0:
@@ -236,17 +236,17 @@ void PPU::set_pixels_for(uint16_t num_dots) {
 }
 
 bool PPU::is_rendering_enabled() {
-    uint8_t ppumask = get_register(PPUMASK);
+    uint8_t ppumask = registers[PPUMASK];
     return (ppumask & 0x18) != 0; // At least one of background and sprites are enabled
 }
 
 void PPU::set_vblank() {
-    uint8_t ppustatus = get_register(PPUSTATUS);
-    set_register(PPUSTATUS, ppustatus | 0x80);
+    uint8_t ppustatus = registers[PPUSTATUS];
+    registers[PPUSTATUS] = ppustatus | 0x80;
 }
 void PPU::clear_vblank() {
-    uint8_t ppustatus = get_register(PPUSTATUS);
-    set_register(PPUSTATUS, ppustatus & 0x7f);
+    uint8_t ppustatus = registers[PPUSTATUS];
+    registers[PPUSTATUS] = ppustatus & 0x7f;
 }
 
 uint8_t PPU::read_address(uint16_t addr) {
