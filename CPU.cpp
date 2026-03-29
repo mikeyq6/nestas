@@ -1,4 +1,5 @@
 #include "inc/CPU.h"
+#include <iostream>
 
 CPU::CPU(SharedData *shared_data, PPU *ppu, Mapper *mapper) {
     a = 0;
@@ -81,6 +82,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x8a: // TXA Implied
         case 0x9a: // TXS Implied
         case 0x98: // TYA Implied
+        case 0x78: // SEI Implied
             inst->cycles = 2;
             break;
         case 0x69: // ADC Immediate
@@ -436,6 +438,9 @@ void CPU::execute_instruction(Instruction *inst) {
             break;
         case 0xf8: // SED Implied
             set_flag(D);
+            break;
+        case 0x78: // SEI Implied
+            set_flag(I);
             break;
         case 0xb8: // CLV Implied
             reset_flag(V);
@@ -1040,6 +1045,7 @@ void CPU::SBC(uint8_t value) {
 
 void CPU::check_interrupts() {
     if(shared_data->get_nmi_pending()) {
+        std::cout << "NMI triggered at PC: " << std::hex << pc << std::dec << std::endl;
         push((pc >> 8) & 0xff); // push high byte of PC
         push(pc & 0xff);        // push low byte of PC
         push(p);                // push processor status
@@ -1048,6 +1054,7 @@ void CPU::check_interrupts() {
         pc = (read_memory(0xfffb) << 8) | read_memory(0xfffa);
         shared_data->set_nmi_pending(false);
     } else if(shared_data->get_irq_pending()) { // Only check if the NMI isn't handled
+        std::cout << "IRQ triggered at PC: " << std::hex << pc << std::dec << std::endl;
         push((pc >> 8) & 0xff); // push high byte of PC
         push(pc & 0xff);        // push low byte of PC
         push(p);                // push processor status
