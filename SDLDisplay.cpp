@@ -120,6 +120,7 @@ void SDLDisplay::process_key_event(SDL_Event* event) {
 
 		switch (event->key.keysym.sym) {
 			case SDLK_ESCAPE:
+			case SDLK_q:
 				quit = true;
 				break;
 			case SDLK_t:
