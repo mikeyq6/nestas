@@ -17,6 +17,8 @@ CPU::~CPU() {
 
 void CPU::init() {
     s = 0xfd;
+    pc = (read_memory(0xfffc) | (read_memory(0xfffd) << 8));
+    p = 0;
 
     std::fill(memory, memory + MEMORY_SIZE, 0);
 
