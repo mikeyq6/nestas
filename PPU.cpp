@@ -245,7 +245,7 @@ bool PPU::is_rendering_enabled() {
 
 void PPU::set_vblank() {
     uint8_t ppustatus = get_register(PPUSTATUS);
-    set_register(PPUSTATUS, ppustatus | 0x80);
+    registers[PPUSTATUS] = ppustatus | 0x80;
 }
 void PPU::clear_vblank() {
     uint8_t ppustatus = get_register(PPUSTATUS);
