@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <vector>
 
+#include <fmt/format.h>
+
 #include "Constants.h"
 #include "mappers/Mapper.h"
 #include "PPU.h"
@@ -21,6 +23,23 @@ enum FLAG {
     V = 0x40,
     N = 0x80
 };
+
+typedef enum _instruction_format {
+    IMPLIED,
+    ACCUMULATOR,
+    IMMEDIATE,
+    ZERO_PAGE,
+    ZERO_PAGE_X,
+    ZERO_PAGE_Y,
+    RELATIVE,
+    ABSOLUTE,
+    ABSOLUTE_X,
+    ABSOLUTE_Y,
+    INDIRECT,
+    INDIRECT_X,
+    INDIRECT_Y,
+    NA
+} InstructionFormat;
 
 typedef struct _instruction {
     uint8_t opcode;
@@ -91,5 +110,6 @@ private:
 
     // Debug functions
     void print_instruction(Instruction *inst);
-    const char *get_instruction_name(Instruction *inst);
+    std::string get_instruction_format(InstructionFormat fmt);
+    std::string get_instruction_name(Instruction *inst);
 };
