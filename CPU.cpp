@@ -59,7 +59,8 @@ void CPU::get_next_instruction(uint8_t *inst) {
 }
 
 void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
-    inst->opcode = 0x00;
+    inst->opcode = cur_inst;
+    inst->num_operands = 0;
     switch(cur_inst) {
         case 0x0a: // ASL Accumulator
         case 0x18: // CLC Implied
@@ -105,6 +106,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x09: // ORA Immediate
         case 0xe9: // SBC Immediate
             inst->operand1 = read_memory(pc++);
+            inst->num_operands = 1;
             inst->cycles = 2; // +1 if branch taken, +2 if page crossed
             break;
         case 0x48: // PHA Implied
@@ -127,11 +129,13 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x86: // STX Zero Page
         case 0x84: // STY Zero Page
             inst->operand1 = read_memory(pc++);
+            inst->num_operands = 1;
             inst->cycles = 3;
             break;
         case 0x4c: // JMP Absolute
             inst->operand1 = read_memory(pc++);
             inst->operand2 = read_memory(pc++);
+            inst->num_operands = 2;
             inst->cycles = 3;
             break;
         case 0x68: // PLA Implied
@@ -151,6 +155,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x96: // STX Zero Page,Y
         case 0x94: // STY Zero Page,X
             inst->operand1 = read_memory(pc++);
+            inst->num_operands = 1;
             inst->cycles = 4;
             break;
         case 0x6d: // ADC Absolute
@@ -185,6 +190,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x8c: // STY Absolute
             inst->operand1 = read_memory(pc++);
             inst->operand2 = read_memory(pc++);
+            inst->num_operands = 2;
             inst->cycles = 4; // +1 if page crossed
             break;
         case 0x71: // ADC (Indirect),Y
@@ -203,11 +209,13 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x9d: // STA (Indirect),Y
         case 0x99: // STA Absolute,Y
             inst->operand1 = read_memory(pc++);
+            inst->num_operands = 1;
             inst->cycles = 5; // +1 if page crossed
             break;
         case 0x6c: // JMP Indirect
             inst->operand1 = read_memory(pc++);
             inst->operand2 = read_memory(pc++);
+            inst->num_operands = 2;
             inst->cycles = 5; // +1 if page crossed
             break;
         case 0x40: // RTI Implied
@@ -230,6 +238,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x81: // STA (Indirect,X)
         case 0x91: // STA (Indirect),Y
             inst->operand1 = read_memory(pc++);
+            inst->num_operands = 1;
             inst->cycles = 6;
             break;
         case 0x0e: // ASL Absolute
@@ -241,6 +250,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x6e: // ROR Absolute
             inst->operand1 = read_memory(pc++);
             inst->operand2 = read_memory(pc++);
+            inst->num_operands = 2;
             inst->cycles = 6;
             break;
         case 0x00: // BRK
@@ -254,6 +264,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x7e: // ROR Absolute,X
             inst->operand1 = read_memory(pc++);
             inst->operand2 = read_memory(pc++);
+            inst->num_operands = 2;
             inst->cycles = 7;
             break;
         default:

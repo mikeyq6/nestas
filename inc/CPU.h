@@ -27,6 +27,7 @@ typedef struct _instruction {
     uint8_t operand1;
     uint8_t operand2;
     uint8_t cycles;
+    uint8_t num_operands;
 } Instruction;
 
 class CPU {
