@@ -88,4 +88,8 @@ private:
     void SBC(uint8_t value);
 
     void dma(uint8_t value);
+
+    // Debug functions
+    void print_instruction(Instruction *inst);
+    const char *get_instruction_name(Instruction *inst);
 };

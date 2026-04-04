@@ -40,6 +40,7 @@ void CPU::run() {
 
         // decode
         decode_instruction(cur_inst, &inst);
+        print_instruction(&inst); // for debugging
 
         // execute
         execute_instruction(&inst);
@@ -1073,5 +1074,28 @@ void CPU::check_interrupts() {
 
         // Get the new PC
         pc = (read_memory(0xffff) << 8) | read_memory(0xfffe);
+    }
+}
+
+void CPU::print_instruction(Instruction *inst) {
+    std::cout << "Instruction: " << std::hex << (int)inst->opcode << " Operands: " << std::hex << (int)inst->operand1 << " " << std::hex << (int)inst->operand2;
+    std::cout << " A: " << std::hex << (int)a << " X: " << std::hex << (int)x << " Y: " << std::hex << (int)y;
+    std::cout << " P: " << std::hex << (int)p << " S: " << std::hex << (int)s;
+    std::cout << " PC: " << std::hex << pc;
+    std::cout << std::dec << std::endl;
+}
+
+const char *CPU::get_instruction_name(Instruction *inst) {
+    switch(inst->opcode) {
+        case 0x69: return "ADC Immediate";
+        case 0x65: return "ADC Zero Page";
+        case 0x75: return "ADC Zero Page,X";
+        case 0x6d: return "ADC Absolute";
+        case 0x7d: return "ADC Absolute,X";
+        case 0x79: return "ADC Absolute,Y";
+        case 0x61: return "ADC (Indirect,X)";
+        case 0x71: return "ADC (Indirect),Y";
+        // ... (add cases for all opcodes)
+        default: return "Unknown Instruction";
     }
 }
