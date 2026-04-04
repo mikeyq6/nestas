@@ -5,6 +5,7 @@ cmake_minimum_required(VERSION 3.10)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
 set(CMAKE_C_COMPILER /usr/bin/gcc)
 set(CMAKE_CXX_COMPILER /usr/bin/g++)
 
@@ -68,6 +69,11 @@ add_executable(nestas
 
 target_link_libraries(nestas SDL2::SDL2 SDL2_image::SDL2_image)
 
-target_compile_options(nestas PRIVATE -Wall -Werror -pthread)
+target_compile_options(nestas PRIVATE 
+    -Wall 
+    -Werror
+    -pthread
+    $<$<CONFIG:Debug>:-g3>
+)
 
 add_definitions(-DDEBUG=1)
