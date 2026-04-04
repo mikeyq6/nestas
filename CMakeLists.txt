@@ -44,6 +44,15 @@ if (USE_VENDORED_SDL)
     )
     FetchContent_MakeAvailable(SDL2_image)
 
+    FetchContent_Declare(
+        fmt
+        GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+        GIT_TAG 12.1.0
+        GIT_SHALLOW TRUE
+        GIT_PROGRESS TRUE
+    )
+    FetchContent_MakeAvailable(fmt)
+
 endif()
 
 set(SDL2_IMAGE_INSTALL OFF)
@@ -67,7 +76,7 @@ add_executable(nestas
     mappers/UxROM.cpp
 )
 
-target_link_libraries(nestas SDL2::SDL2 SDL2_image::SDL2_image)
+target_link_libraries(nestas SDL2::SDL2 SDL2_image::SDL2_image fmt::fmt)
 
 target_compile_options(nestas PRIVATE 
     -Wall 
