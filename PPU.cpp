@@ -33,10 +33,12 @@ void PPU::init() {
 }
 
 uint8_t PPU::get_register(uint8_t reg) {
+    uint8_t value;
     switch(reg) {
         case PPUSTATUS: 
-            return registers[PPUSTATUS] & 0xe0; // Only bits 7-5 are readable
+            value = registers[PPUSTATUS] & 0xe0; // Only bits 7-5 are readable
             registers[PPUSTATUS] &= 0x7f; // Clear vblank flag after read
+            return value;
             break;
         case PPUMASK:
         case PPUCTRL:
