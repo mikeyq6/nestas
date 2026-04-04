@@ -866,6 +866,8 @@ void CPU::execute_instruction(Instruction *inst) {
         case 0xea: // NOP Implied
             break;
         default:
+            std::cout << "Unknown instruction " << std::hex << inst->opcode;
+            exit(2);
             // For unknown instructions, we can just ignore them or log an error.
             break;
     }
