@@ -392,7 +392,7 @@ void CPU::execute_instruction(Instruction *inst) {
             break;
         case 0xd0: // BNE Relative
             if(!is_set(Z)) {
-                pc += (int8_t)inst->operand1; // branch offset is signed
+                pc += ((int8_t)inst->operand1); // branch offset is signed c754
                 inst->cycles++; // branch taken
                 if((pc & 0xff00) != ((pc - (int8_t)inst->operand1) & 0xff00)) {
                     inst->cycles++; // page crossed
@@ -611,9 +611,11 @@ void CPU::execute_instruction(Instruction *inst) {
             // TODO: Implement bug page crossing behavior for JMP Indirect, see https://www.nesdev.org/wiki/Instruction_reference#JMP
             break;
         case 0x20: // JSR Absolute
+            addr = inst->operand2 << 8 | inst->operand1;
+            pc--;
             push((pc >> 8) & 0xff); // push high byte of PC
             push(pc & 0xff);        // push low byte of PC
-            pc = read_memory((inst->operand2 << 8) | read_memory(inst->operand1));
+            pc = read_memory(addr) << 8 | read_memory(addr + 1);
             break;
         case 0xa9: // LDA Immediate
             LDN(&a, inst->operand1);
@@ -625,7 +627,7 @@ void CPU::execute_instruction(Instruction *inst) {
             LDN(&a, read_memory((inst->operand1 + x) & 0xff));
             break;
         case 0xad: // LDA Absolute
-            LDN(&a, read_memory(inst->operand2 << 8 | read_memory(inst->operand1)));
+            LDN(&a, read_memory(inst->operand2 << 8 | inst->operand1));
             break;
         case 0xbd: // LDA Absolute,X
             if(inst->operand1 + x > 0xff) inst->cycles++; // page crossed
