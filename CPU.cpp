@@ -35,6 +35,8 @@ void CPU::run() {
     uint8_t cur_inst = 0;
     Instruction inst;
     while(shared_data->get_is_running()) {
+        old_pc = pc;
+
         // fetch
         get_next_instruction(&cur_inst);
 
@@ -1078,6 +1080,7 @@ void CPU::check_interrupts() {
 }
 
 void CPU::print_instruction(Instruction *inst) {
+    std::cout << std::hex << (int)old_pc << "\t ";
     std::cout << get_instruction_name(inst);
     std::cout << " A: " << std::hex << (int)a << " X: " << std::hex << (int)x << " Y: " << std::hex << (int)y;
     std::cout << " P: " << std::hex << (int)p << " S: " << std::hex << (int)s;

@@ -63,7 +63,7 @@ private:
 
     // registers
     uint8_t a, x, y, p, s;
-    uint16_t pc;
+    uint16_t pc, old_pc;
 
     SharedData *shared_data;
     Mapper *mapper;
