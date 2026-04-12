@@ -189,6 +189,7 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0xfd: // SBC Absolute,X
         case 0xf9: // SBC Absolute,Y
         case 0x8d: // STA Absolute
+        case 0x99: // STA Absolute,Y
         case 0x8e: // STX Absolute
         case 0x8c: // STY Absolute
             inst->operand1 = read_memory(pc++);
@@ -210,7 +211,6 @@ void CPU::decode_instruction(uint8_t cur_inst, Instruction *inst) {
         case 0x66: // ROR Zero Page
         case 0xf1: // SBC (Indirect),Y
         case 0x9d: // STA (Indirect),Y
-        case 0x99: // STA Absolute,Y
             inst->operand1 = read_memory(pc++);
             inst->num_operands = 1;
             inst->cycles = 5; // +1 if page crossed
@@ -1086,7 +1086,7 @@ void CPU::check_interrupts() {
 }
 
 void CPU::print_instruction(Instruction *inst) {
-    std::cout << std::hex << (int)old_pc << "\t ";
+    std::cout << std::hex << (int)old_pc << "\t" << std::hex << (int)inst->opcode << "\t ";
     std::cout << get_instruction_name(inst);
     std::cout << " A: " << std::hex << (int)a << " X: " << std::hex << (int)x << " Y: " << std::hex << (int)y;
     std::cout << " P: " << std::hex << (int)p << " S: " << std::hex << (int)s;
