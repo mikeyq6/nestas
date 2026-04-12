@@ -607,8 +607,12 @@ void CPU::execute_instruction(Instruction *inst) {
             pc = (inst->operand2 << 8) | inst->operand1;
             break;
         case 0x6c: // JMP Indirect
-            pc = read_memory((inst->operand2 << 8) | inst->operand1);
-            // TODO: Implement bug page crossing behavior for JMP Indirect, see https://www.nesdev.org/wiki/Instruction_reference#JMP
+            addr = inst->operand2 << 8 | inst->operand1;
+            if((addr & 0x00ff) == 0xff) {
+                pc = read_memory(addr) << 8 | read_memory(addr & 0xff00); // emulate page boundary hardware bug
+            } else {
+                pc = read_memory(addr) << 8 | read_memory(addr + 1);
+            }
             break;
         case 0x20: // JSR Absolute
             addr = inst->operand2 << 8 | inst->operand1;
