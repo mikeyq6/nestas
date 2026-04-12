@@ -604,7 +604,7 @@ void CPU::execute_instruction(Instruction *inst) {
             if(y & 0x80) set_flag(N); else reset_flag(N);
             break;
         case 0x4c: // JMP Absolute
-            pc = (inst->operand2 << 8) | inst->operand1;
+            pc = inst->operand2 << 8 | inst->operand1;
             break;
         case 0x6c: // JMP Indirect
             addr = inst->operand2 << 8 | inst->operand1;
