@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <iostream>
 
 using std::uint8_t;
 using std::uint16_t;
@@ -42,6 +43,8 @@ public:
     virtual ~Mapper();
     virtual uint8_t read(uint16_t addr) = 0;
     virtual void write(uint16_t addr, uint8_t value) = 0;
+
+    void print_mapper_info();
 
 protected:
     constexpr static auto TRAINER_SIZE = 0x200; // 512 bytes

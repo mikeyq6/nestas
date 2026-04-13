@@ -8,6 +8,8 @@ Emulator::Emulator(const char *raw_cartridge_data) {
     mapper = MapperFactory::get_mapper(shared_data, raw_cartridge_data);
     ppu = new PPU(shared_data, mapper);
     cpu = new CPU(shared_data, ppu, mapper);
+
+    mapper->print_mapper_info();
 }
 Emulator::~Emulator() {
     delete shared_data;

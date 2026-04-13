@@ -152,3 +152,16 @@ void Mapper::read_rom_data(const char *raw_cartridge_data) {
         chr_rom[i] = raw_cartridge_data[16 + prg_rom_size + j];
     }
 }
+
+void Mapper::print_mapper_info() {
+    std::cout << "MapperInfo:\nMapper Number: " << mapper_number << std::endl;
+    std::cout << "Console Type: " << console_type << std::endl;
+    std::cout << "Nametable Layout: " << nametable_layout << std::endl;
+    std::cout << "CPU/PPU Timing: " << cpu_ppu_timing << std::endl;
+    std::cout << "prg_rom_size: " << std::hex << prg_rom_size << std::endl;
+    std::cout << "chr_rom_size: " << std::hex << chr_rom_size << std::endl;
+    std::cout << "prg_ram_size: " << std::hex << prg_ram_size << std::endl;
+    std::cout << "prg_nvram_size: " << std::hex << prg_nvram_size << std::endl;
+    std::cout << "chr_ram_size: " << std::hex << chr_ram_size << std::endl;
+    std::cout << "chr_nvram_size: " << std::hex << chr_nvram_size << std::endl;
+}
